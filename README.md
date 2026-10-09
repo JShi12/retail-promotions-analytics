@@ -65,7 +65,7 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.run_local \
 
 1. Push this repo to GitHub, then in Databricks: *Workspace → Create → Git folder* with the repo URL.
 2. Run `notebooks/00_setup` once. It creates the catalog (`retail`, or set the widget to `workspace`),
-   the `raw/bronze/silver/gold/ops` schemas and the `raw.landing` volume.
+   the `raw/bronze/silver/gold` schemas plus `ops` (operations: logs and run records) and the `raw.landing` volume.
 3. Upload the 8 CSVs to the volume (*Catalog → raw → landing → Upload to this volume*), about 848 MB.
 4. Re-run the last cell of `00_setup` to confirm all files are present, then run `01_bronze`,
    `02_silver`, `03_gold` and `04_dq_report` in order. `01_bronze` starts a run; the next two pick

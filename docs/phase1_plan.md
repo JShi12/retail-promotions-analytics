@@ -14,7 +14,7 @@ flowchart LR
     gold -.-> ops
 ```
 
-Data moves left to right; dashed lines show each layer writing its flags and check results to `ops`.
+Data moves left to right; dashed lines show each layer writing its flags and check results to `ops` (operations: logs and run records about the pipeline itself).
 
 ## Context and constraints
 

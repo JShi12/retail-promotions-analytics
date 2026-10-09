@@ -5,7 +5,7 @@
 # MAGIC
 # MAGIC **Key terms**
 # MAGIC - *Flag, don't drop*: only exact duplicate rows are removed. Every other problem row is kept, and its rule names are added to the row's `dq_flags` array.
-# MAGIC - *DQ log (`ops.dq_log`)*: one row per flagged, modified or dropped record, with the rule and the reason.
+# MAGIC - *DQ log (`ops.dq_log`, in the `ops` (operations) schema)*: one row per flagged, modified or dropped record, with the rule and the reason.
 # MAGIC - *OR rule*: `causal_data` lists 15,245 product-store-weeks twice with conflicting codes. They are collapsed to one row that counts as on display (or in the mailer) if either source row says so.
 # MAGIC - *Checks*: table-level pass/fail tests (row reconciliation, unique keys, valid references, documented codes). An error-level failure stops the run.
 # MAGIC

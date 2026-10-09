@@ -5,7 +5,7 @@
 # MAGIC
 # MAGIC **Key terms**
 # MAGIC - *Catalog*: the top level of Unity Catalog's `catalog.schema.table` naming. This project uses `retail`; if Free Edition does not allow creating catalogs, set the `catalog` widget to the default `workspace`.
-# MAGIC - *Schemas*: one per pipeline layer (`raw`, `bronze`, `silver`, `gold`) plus `ops` for data-quality (DQ) logs and run records.
+# MAGIC - *Schemas*: one per pipeline layer (`raw`, `bronze`, `silver`, `gold`) plus `ops` (operations) for data-quality (DQ) logs and run records.
 # MAGIC - *Volume*: a governed folder for files. The raw CSVs are uploaded to the `raw.landing` volume.
 # MAGIC
 # MAGIC **Contents**
@@ -44,6 +44,7 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "..", "src")))
 from retail_promo.config import RAW_FILES
 
+catalog = dbutils.widgets.get("catalog")  # re-read so this cell can run on its own
 landing = f"/Volumes/{catalog}/raw/landing"
 present = {f.name for f in dbutils.fs.ls(landing)}
 missing = [f"{stem}.csv" for stem in RAW_FILES if f"{stem}.csv" not in present]
