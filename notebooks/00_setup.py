@@ -1,9 +1,16 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # 00 · Setup
-# MAGIC Creates the Unity Catalog objects the pipeline writes to and checks that the 8 raw CSVs are in the landing volume.
+# MAGIC **Goal:** create the Unity Catalog objects the pipeline writes to, and confirm the 8 raw dunnhumby CSV files are in place before the first run.
 # MAGIC
-# MAGIC Run once. Then upload the CSVs (Catalog → `raw` schema → `landing` volume → *Upload to this volume*) and re-run the last cell.
+# MAGIC **Key terms**
+# MAGIC - *Catalog*: the top level of Unity Catalog's `catalog.schema.table` naming. This project uses `retail`; if Free Edition does not allow creating catalogs, set the `catalog` widget to the default `workspace`.
+# MAGIC - *Schemas*: one per pipeline layer (`raw`, `bronze`, `silver`, `gold`) plus `ops` for data-quality (DQ) logs and run records.
+# MAGIC - *Volume*: a governed folder for files. The raw CSVs are uploaded to the `raw.landing` volume.
+# MAGIC
+# MAGIC **Contents**
+# MAGIC 1. Create the catalog, schemas and volume — run once.
+# MAGIC 2. Check the raw files — re-run after uploading the CSVs (Catalog → `raw` → `landing` → *Upload to this volume*).
 
 # COMMAND ----------
 
@@ -12,12 +19,22 @@ catalog = dbutils.widgets.get("catalog")
 
 # COMMAND ----------
 
-# Free Edition may not allow new catalogs; if this fails, set the widget to the default `workspace` catalog.
+# MAGIC %md
+# MAGIC ## 1. Create the catalog, schemas and volume
+
+# COMMAND ----------
+
 spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog}")
 for schema in ["raw", "bronze", "silver", "gold", "ops"]:
     spark.sql(f"CREATE SCHEMA IF NOT EXISTS {catalog}.{schema}")
 spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog}.raw.landing")
 display(spark.sql(f"SHOW SCHEMAS IN {catalog}"))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 2. Check the raw files
+# MAGIC All 8 files must be present under their original names (`transaction_data.csv`, `causal_data.csv`, ...).
 
 # COMMAND ----------
 

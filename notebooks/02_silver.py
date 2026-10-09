@@ -1,7 +1,23 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # 02 · Silver
-# MAGIC Types every column with `try_cast`, drops exact duplicates, flags every other problem row (flag, don't drop), and writes one `ops.dq_log` row per flagged, modified or dropped record. Conflicting `causal_data` duplicates are collapsed by the OR rule. Error-level checks stop the run.
+# MAGIC **Goal:** turn bronze into typed, deduplicated tables where every data-quality (DQ) problem is flagged and logged rather than silently fixed or dropped.
+# MAGIC
+# MAGIC **Key terms**
+# MAGIC - *Flag, don't drop*: only exact duplicate rows are removed. Every other problem row is kept, and its rule names are added to the row's `dq_flags` array.
+# MAGIC - *DQ log (`ops.dq_log`)*: one row per flagged, modified or dropped record, with the rule and the reason.
+# MAGIC - *OR rule*: `causal_data` lists 15,245 product-store-weeks twice with conflicting codes. They are collapsed to one row that counts as on display (or in the mailer) if either source row says so.
+# MAGIC - *Checks*: table-level pass/fail tests (row reconciliation, unique keys, valid references, documented codes). An error-level failure stops the run.
+# MAGIC
+# MAGIC **Contents**
+# MAGIC 1. Settings and run ID
+# MAGIC 2. Build silver and run checks
+# MAGIC 3. DQ log counts for this run
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 1. Settings and run ID
 
 # COMMAND ----------
 
@@ -23,8 +39,19 @@ print("run_id:", run_id)
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC ## 2. Build silver and run checks
+
+# COMMAND ----------
+
 results = pipeline.run_silver(spark, io, run_id, settings)
 display(spark.createDataFrame([r.__dict__ for r in results]))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## 3. DQ log counts for this run
+# MAGIC Rows per table, rule and action (`flagged`, `modified`, `dropped`).
 
 # COMMAND ----------
 

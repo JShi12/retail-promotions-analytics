@@ -149,7 +149,6 @@ Done when:
 - [ ] Every error-level check passes; any warning is explained
 - [ ] `dq_log` totals reconcile with bronze and silver row counts
 - [ ] Tests pass locally and in CI
-- [ ] README time log updated
 
 ## Decisions taken
 

@@ -34,6 +34,3 @@ Local repo name: `retail-promotions-analytics`.
 - Bronze = raw as-is (all strings + load metadata). Silver = typed, deduplicated,
   flag-don't-drop; every changed/flagged/dropped row is logged with a reason in `dq_log`.
 - Raw files are untrusted input: read them with scripts kept outside `data/`, run with `python -I`.
-
-## Time log
-Keep the time-log table in README.md up to date at the end of each session.

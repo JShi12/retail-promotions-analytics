@@ -82,10 +82,3 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.run_local \
 
 Rules and checks are listed in [`src/retail_promo/dq.py`](src/retail_promo/dq.py) and
 [`src/retail_promo/pipeline.py`](src/retail_promo/pipeline.py).
-
-## Time log
-
-| Date | Phase | Hours | What was done |
-|---|---|---:|---|
-| 2026-10-09 | 1 | _fill in_ | Phase 1 plan; `src/` pipeline (bronze/silver/gold, DQ rules and checks), 23 tests, notebooks, CI; local dry run on full data: 49/49 checks pass in 154 s |
-| 2026-10-09 | 0 | _fill in_ | Repo and uv setup, JDK, data download, three profiling passes over all 8 files, data dictionary |
