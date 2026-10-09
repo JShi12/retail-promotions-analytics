@@ -1,0 +1,28 @@
+# Data: never commit raw or row-level data (dunnhumby terms restrict redistribution)
+data/raw/
+data/interim/
+data/processed/
+*.zip
+*.csv
+*.parquet
+
+# Python / tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# Local Spark artefacts
+spark-warehouse/
+metastore_db/
+derby.log
+
+# Secrets and local Databricks config
+.env
+.databricks/
+.databrickscfg
+
+# OS / editor
+.DS_Store
+.idea/
