@@ -70,6 +70,11 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.ru
 
 ## Running on Databricks (Free Edition)
 
+Attach every notebook to plain **Serverless** compute, not **Git Folder Serverless**. Git Folder
+Serverless builds its environment from this repo's `pyproject.toml`, which pins open-source `pyspark`
+for local development; installing it replaces Databricks' own PySpark and the notebook kernel fails
+to start.
+
 1. Push this repo to GitHub, then in Databricks: *Workspace → Create → Git folder* with the repo URL.
 2. Run `notebooks/00_setup` once. It creates the catalog (`retail`, or set the widget to `workspace`),
    the `raw/bronze/silver/gold` schemas plus `ops` (operations: logs and run records) and the `raw.landing` volume.

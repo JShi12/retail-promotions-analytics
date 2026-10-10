@@ -27,11 +27,24 @@
 
 # MAGIC %md
 # MAGIC ## 1. Setup and model run
-# MAGIC Free Edition restricts outbound internet; if this install fails, see "Future work" in `docs/phase2_plan.md`.
+# MAGIC `pyfixest` is installed with every package already in the serverless environment pinned, so pip can only add packages. Upgrading Databricks' own packages (its PySpark build, IPython) stops the notebook kernel from starting. Do not add this repo's `pyproject.toml` to the notebook environment; it is for local development only. Free Edition restricts outbound internet; if the install fails, see "Future work" in `docs/phase2_plan.md`.
 
 # COMMAND ----------
 
-# MAGIC %pip install pyfixest
+import subprocess
+import sys
+
+frozen = subprocess.run(
+    [sys.executable, "-m", "pip", "freeze"], capture_output=True, text=True, check=True
+).stdout
+pins = [p for p in frozen.splitlines() if "==" in p and " @ " not in p and not p.startswith("-e")]
+with open("/tmp/serverless_constraints.txt", "w") as f:
+    f.write("\n".join(pins))
+print(f"{len(pins)} installed packages pinned")
+
+# COMMAND ----------
+
+# MAGIC %pip install pyfixest -c /tmp/serverless_constraints.txt
 
 # COMMAND ----------
 
