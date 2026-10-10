@@ -39,7 +39,7 @@ Exploration of `gold.product_week_panel` (12,997 products bought in ≥ 26 weeks
 
 ## Category selection
 
-Top 20 commodities by panel sales among those with ≥ 20 products and ≥ 200 mailer product-weeks. This excludes cigarettes (0 mailer product-weeks) and carbonated water (159); the 20 selected cover 43.6% of panel sales (sales ranks 1–22). A category's display lift is reported only if it also has ≥ 200 display product-weeks (chicken has 5, deli meats 81), otherwise marked "not estimable". With 20 category CIs, about one may miss its true value by chance; stated next to the chart.
+Top 20 commodities by panel sales among those with ≥ 20 products and ≥ 200 mailer product-weeks. This excludes cigarettes (0 mailer product-weeks) and carbonated water (159); the 20 selected cover 43.6% of panel sales (sales ranks 1–22). A category's display lift is reported only if it also has ≥ 1,000 display product-weeks, otherwise marked "not estimable". The plan first set 200; it was raised after beef (272 display product-weeks from 10 products) gave an unstable estimate of −10.6. At 1,000, beef, pork, deli meats and chicken have no display estimate. With 20 category CIs, about one may miss its true value by chance; stated next to the chart.
 
 ## Sensitivity checks
 
