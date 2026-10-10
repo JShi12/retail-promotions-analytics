@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 from retail_promo.analysis import promo_lift as pl
-from retail_promo.analysis.phase2 import raw_contrast
+from retail_promo.analysis.phase2 import discount_by_status, raw_contrast
 
 TRUE_MAILER_LIFT = 0.8  # +80% units in mailer weeks
 TRUE_DISPLAY_COEF = 1.5
@@ -101,3 +101,18 @@ def test_select_categories_requires_promotion_variation(spark):
     assert cats["commodity_desc"].tolist() == ["OK"]
     assert not cats.loc[0, "display_estimable"]
     assert cats.loc[0, "sales_rank"] == 2
+
+
+def test_discount_by_status_uses_weeks_with_sales_only():
+    df = pd.DataFrame(
+        {
+            "units": [0, 2, 3, 5],
+            "display_share": [0, 0, 0, 0],
+            "mailer_share": [0, 0, 0, 1.0],
+            "avg_discount_depth": [None, 0.0, 0.2, 0.3],
+        }
+    )
+    out = discount_by_status(df).set_index("status")
+    assert out.loc["none", "weeks_with_sales"] == 2  # the zero-sales week is excluded
+    assert out.loc["none", "share_with_discount"] == 0.5
+    assert out.loc["mailer only", "mean_depth"] == pytest.approx(0.3)

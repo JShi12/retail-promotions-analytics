@@ -17,22 +17,40 @@ from retail_promo.io import TableIO
 class Phase2Results:
     categories: pd.DataFrame  # selected categories and selection stats
     raw_contrast: pd.DataFrame  # mean weekly units by promotion status
+    discount_by_status: pd.DataFrame  # loyalty discounts in weeks with sales, by status
     results: pd.DataFrame  # every estimate (main, category, timing, depth, category net)
     sensitivity: pd.DataFrame  # pooled main-model estimates under each variant
 
 
-def raw_contrast(df: pd.DataFrame) -> pd.DataFrame:
+STATUS_ORDER = ["none", "display only", "mailer only", "both"]
+
+
+def promo_status(df: pd.DataFrame) -> pd.Series:
+    """'none' = no display and no mailer in any store; price discounts are not part of it."""
     status = pd.Series("none", index=df.index)
     status[(df["display_share"] > 0) & (df["mailer_share"] == 0)] = "display only"
     status[(df["display_share"] == 0) & (df["mailer_share"] > 0)] = "mailer only"
     status[(df["display_share"] > 0) & (df["mailer_share"] > 0)] = "both"
+    return status
+
+
+def raw_contrast(df: pd.DataFrame) -> pd.DataFrame:
+    status = promo_status(df)
     out = df.groupby(status).agg(product_weeks=("units", "size"), mean_units=("units", "mean"))
     out["ratio_to_none"] = out["mean_units"] / out.loc["none", "mean_units"]
-    return (
-        out.reindex(["none", "display only", "mailer only", "both"])
-        .rename_axis("status")
-        .reset_index()
+    return out.reindex(STATUS_ORDER).rename_axis("status").reset_index()
+
+
+def discount_by_status(df: pd.DataFrame) -> pd.DataFrame:
+    """How often weeks with sales carry a loyalty discount, and how deep, by promotion status."""
+    sold = df[df["units"] > 0]
+    out = sold.groupby(promo_status(sold)).agg(
+        weeks_with_sales=("units", "size"),
+        share_with_discount=("avg_discount_depth", lambda d: (d > 0).mean()),
+        mean_depth=("avg_discount_depth", "mean"),
+        median_depth=("avg_discount_depth", "median"),
     )
+    return out.reindex(STATUS_ORDER).rename_axis("status").reset_index()
 
 
 def _products_bought_in(df: pd.DataFrame, min_weeks: int) -> pd.Index:
@@ -86,7 +104,7 @@ def run(
             sens_rows.append({**r, "variant": name, "n_products": int(d["product_id"].nunique())})
     sensitivity = pd.DataFrame(sens_rows)
 
-    return Phase2Results(cats, raw_contrast(df), results, sensitivity)
+    return Phase2Results(cats, raw_contrast(df), discount_by_status(df), results, sensitivity)
 
 
 def write_gold(spark: SparkSession, io: TableIO, res: Phase2Results, run_id: str) -> None:

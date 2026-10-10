@@ -104,6 +104,15 @@ display(phase2.estimate_table(res, "product", "pooled"))
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC "None" means no display and no mailer in any store that week; the causal data records nothing else. Price discounts are not part of that definition, so the table below shows how often weeks with sales still carry a loyalty-card discount, and how deep it is (share of shelf value).
+
+# COMMAND ----------
+
+display(res.discount_by_status)
+
+# COMMAND ----------
+
 show(plots.raw_vs_model(res.raw_contrast, res.results), "phase2_raw_vs_model")
 
 # COMMAND ----------
@@ -111,6 +120,7 @@ show(plots.raw_vs_model(res.raw_contrast, res.results), "phase2_raw_vs_model")
 # MAGIC %md
 # MAGIC - Raw averages: mailer-only product-weeks sell 8.15 units vs 1.58 in unpromoted weeks, a ratio of 5.16, i.e. +416%.
 # MAGIC - With product and category-week fixed effects the mailer-week lift is +84.4% (95% CI +75.3% to +94.1%). The raw contrast is about five times larger (416 / 84.4 = 4.9) because the products that get promoted sell more anyway.
+# MAGIC - The "unpromoted" baseline is not discount-free: 39.0% of its weeks with sales carry a loyalty discount (mean depth 7.5%, median 0%). Mailer-only weeks carry one 91.2% of the time, with a mean depth of 26.5%, so the mailer-week lift bundles the feature with a deeper price cut.
 # MAGIC - Every later estimate uses the fixed-effects model.
 
 # COMMAND ----------
