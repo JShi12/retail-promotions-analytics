@@ -21,7 +21,7 @@ dunnhumby's *The Complete Journey* (2,500 households, ~2 years, 2.6M transaction
 | 0 | Setup, data download and inspection, column dictionary ([data/README.md](data/README.md)) | done |
 | 1 | Medallion pipeline: bronze → silver (typed, deduplicated, flag-don't-drop, `dq_log`) → gold; DQ checks; pytest; CI | done: run on Databricks; no failed checks |
 | 2 | Promotion effectiveness: fixed-effects Poisson models of weekly units on mailer and display, by category, with sensitivity and timing checks ([plan](docs/phase2_plan.md)) | done: run on Databricks; every estimate matches the local run |
-| 3 | Segmentation: Spark MLlib k-means on household features; k by silhouette and seed stability | planned |
+| 3 | Segmentation: Spark MLlib k-means on price-and-promotion behaviour (category- and store-adjusted), k by bootstrap stability and a shuffled baseline ([plan](docs/phase3_plan.md)) | built and run locally; Databricks run pending |
 | 4 | Campaign response classifier: pre-campaign features, household-grouped folds, baselines, tuned GBT, importance, targeting curve | planned |
 | 5 | Dashboard on gold tables, scheduled Databricks job, commercial README, REPORT.md | planned |
 | Stretch | Re-run on dunnhumby "Let's Get Sort-of-Real" (~300M rows) for scale | optional |
@@ -39,7 +39,7 @@ src/retail_promo/   PySpark transforms (bronze/silver/gold, dq, features), unit-
 notebooks/          Thin Databricks notebooks that call src/ (via a Databricks Git folder)
 tests/              pytest on local Spark with synthetic data
 data/README.md      Column dictionary and data findings (raw data is gitignored)
-docs/               Phase plans (docs/phase1_plan.md, docs/phase2_plan.md)
+docs/               Phase plans (docs/phase1_plan.md, docs/phase2_plan.md, docs/phase3_plan.md)
 reports/figures/    Saved figures (aggregates only)
 ```
 
@@ -67,6 +67,7 @@ Phase 2 locally (needs the local pipeline run above; writes figures to `reports/
 
 ```bash
 JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase2_local
+JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase3_local   # Phase 3, ~10 min
 ```
 
 ## Running on Databricks (Free Edition)
@@ -84,6 +85,7 @@ to start.
    `02_silver`, `03_gold` and `04_dq_report` in order. `01_bronze` starts a run; the next two pick
    up its `run_id` automatically (or pass one in the `run_id` widget, as a job does).
 5. Phase 2: run `10_promo_effectiveness`. Its first cell installs `pyfixest` from PyPI.
+6. Phase 3: run `20_customer_segments` (several minutes: k selection refits k-means many times).
 
 ## Pipeline (Phase 1)
 

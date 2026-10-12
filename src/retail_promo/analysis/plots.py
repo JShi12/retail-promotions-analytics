@@ -36,6 +36,14 @@ def _title(ax, title: str, subtitle: str) -> None:
                 ha="left", fontsize=9, color=MUTED)  # fmt: skip
 
 
+def _fig_title(fig, title: str, subtitle: str, wspace: float = 0.3) -> None:
+    """Title and subtitle for multi-panel figures, at fixed inch offsets from the top edge."""
+    h = fig.get_figheight()
+    fig.text(0.01, 1 - 0.28 / h, title, ha="left", fontsize=12, fontweight="semibold", color=INK)
+    fig.text(0.01, 1 - 0.52 / h, subtitle, ha="left", fontsize=9, color=MUTED)
+    fig.subplots_adjust(top=1 - 1.0 / h, wspace=wspace, left=0.07, right=0.97, bottom=0.16)
+
+
 def _pct(x, _=None) -> str:
     return f"{x:+.0%}" if x != 0 else "0%"
 
@@ -190,4 +198,143 @@ def timing(results: pd.DataFrame):
     _style(ax, grid_axis="y")
     _title(ax, "Sales are slightly higher the week before and after a mailer, not lower",
            "% change in weekly units associated with a mailer in each week, 95% CI (one model)")  # fmt: skip
+    return fig
+
+
+# ---------------------------------------------------------------- Phase 3
+
+SEGMENT_COLOURS = [BLUE, ORANGE, AQUA]
+
+
+def _seg_ticks(profiles: pd.DataFrame) -> list[str]:
+    return [
+        f"{s}. {lab}" for s, lab in zip(profiles["segment"], profiles["segment_label"], strict=True)
+    ]
+
+
+def k_selection(summary: pd.DataFrame, chosen: int):
+    """Silhouette against the shuffled baseline, and the least stable segment, for each k."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 3.2))
+    a1.plot(summary["k"], summary["silhouette"], "o-", color=BLUE, lw=1.5, ms=5, label="Segments")
+    a1.plot(
+        summary["k"],
+        summary["shuffled_silhouette"],
+        "o--",
+        color=GREY,
+        lw=1.2,
+        ms=4,
+        label="Shuffled features",
+    )
+    a1.set_xticks(summary["k"])
+    a1.set_xlabel("Number of segments (k)", fontsize=9, color=MUTED)
+    a1.set_ylabel("Silhouette", fontsize=9, color=MUTED)
+    a1.legend(frameon=False, fontsize=8)
+    _style(a1, grid_axis="y")
+    colours = [BLUE if k == chosen else GREY for k in summary["k"]]
+    a2.bar(summary["k"], summary["min_segment_jaccard"], color=colours, width=0.6)
+    a2.axhline(0.75, color=INK, lw=0.8, ls="--")
+    a2.text(summary["k"].max() + 0.45, 0.75, "stable\n(0.75)", va="center", fontsize=8, color=MUTED)
+    a2.set_xlabel("Number of segments (k)", fontsize=9, color=MUTED)
+    a2.set_ylabel("Least stable segment (Jaccard)", fontsize=9, color=MUTED)
+    a2.set_ylim(0, 1)
+    _style(a2, grid_axis="y")
+    _fig_title(fig, f"k = {chosen} gives the clearest gain over shuffled data with every segment stable",
+               "Left: silhouette vs the same data with each feature shuffled. Right: lowest bootstrap Jaccard among the segments")  # fmt: skip
+    return fig
+
+
+def segment_centroids(centroids: pd.DataFrame):
+    """Standardised centre of each segment on the three clustering inputs."""
+    names = {
+        "deal_index": "Deal-proneness index",
+        "pl_adjusted": "Own label (adjusted)",
+        "log_coupon": "Coupon use",
+    }
+    fig, ax = plt.subplots(figsize=(7.2, 3.0))
+    y = np.arange(len(names))
+    for i, row in centroids.reset_index(drop=True).iterrows():
+        vals = [row[c] for c in names]
+        ax.plot(vals, y + (i - 1) * 0.18, "o", color=SEGMENT_COLOURS[i], ms=7,
+                label=f"{row['segment']}. {row['segment_label']}")  # fmt: skip
+    ax.axvline(0, color=GREY, lw=0.8)
+    ax.set_yticks(y, list(names.values()), fontsize=9, color=INK)
+    ax.set_xlabel("Standard deviations from the average household", fontsize=9, color=MUTED)
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    ax.invert_yaxis()
+    _style(ax)
+    _title(ax, "Each segment is defined by where it sits on three behaviours",
+           "Segment centre on each clustering input, standardised (0 = average household)")  # fmt: skip
+    return fig
+
+
+def actual_vs_expected(profiles: pd.DataFrame):
+    """Median actual vs expected (same categories, same stores) for each behaviour and segment."""
+    panels = [
+        ("promo", "Promotion share of spend"),
+        ("disc", "Discount (% off shelf price)"),
+        ("pl", "Own-label share of spend"),
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(10, 3.4), sharey=False)
+    x = np.arange(len(profiles))
+    for ax, (m, label) in zip(axes, panels, strict=True):
+        ax.bar(x - 0.18, profiles[f"{m}_expected"], width=0.34, color=GREY, label="Expected")
+        ax.bar(x + 0.18, profiles[f"{m}_actual"], width=0.34, color=BLUE, label="Actual")
+        for xi, v in zip(x, profiles[f"{m}_actual"], strict=True):
+            ax.text(xi + 0.18, v, f"{v:.0%}", ha="center", va="bottom", fontsize=7.5, color=INK)
+        ax.set_xticks(x, [f"Seg {s}" for s in profiles["segment"]], fontsize=8.5, color=INK)
+        ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0%}"))
+        ax.set_title(label, fontsize=9, color=INK, loc="left")
+        _style(ax, grid_axis="y")
+    h = fig.get_figheight()
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(
+        handles,
+        labels,
+        frameon=False,
+        fontsize=8,
+        ncol=2,
+        loc="upper right",
+        bbox_to_anchor=(0.97, 1 - 0.38 / h),
+    )
+    _fig_title(
+        fig,
+        "Segments differ from what their own categories and stores would predict",
+        "Median household; expected = same categories in the same stores, other households' rates",
+    )
+    return fig
+
+
+def size_and_redemption(profiles: pd.DataFrame):
+    """Share of households and of spend per segment, and campaign coupon redemption rate."""
+    fig, (a1, a2) = plt.subplots(1, 2, figsize=(9, 3.2))
+    x = np.arange(len(profiles))
+    hh_share = profiles["households"] / profiles["households"].sum()
+    a1.bar(x - 0.18, hh_share, width=0.34, color=BLUE, label="Households")
+    a1.bar(x + 0.18, profiles["share_of_spend"], width=0.34, color=ORANGE, label="Spend")
+    for xi, h, s in zip(x, hh_share, profiles["share_of_spend"], strict=True):
+        a1.text(xi - 0.18, h, f"{h:.0%}", ha="center", va="bottom", fontsize=7.5, color=INK)
+        a1.text(xi + 0.18, s, f"{s:.0%}", ha="center", va="bottom", fontsize=7.5, color=INK)
+    a1.set_xticks(x, [f"Seg {s}" for s in profiles["segment"]], fontsize=8.5, color=INK)
+    a1.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0%}"))
+    a1.legend(frameon=False, fontsize=8)
+    a1.set_title("Share of households and of spend", fontsize=9, color=INK, loc="left")
+    _style(a1, grid_axis="y")
+    a2.bar(x, profiles["redemption_rate"], width=0.5, color=BLUE)
+    for xi, r, n in zip(x, profiles["redemption_rate"], profiles["campaign_pairs"], strict=True):
+        a2.text(xi, r, f"{r:.1%}\n(n={n:,})", ha="center", va="bottom", fontsize=7.5, color=INK)
+    a2.set_xticks(x, [f"Seg {s}" for s in profiles["segment"]], fontsize=8.5, color=INK)
+    a2.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0%}"))
+    a2.set_ylim(0, profiles["redemption_rate"].max() * 1.35)
+    a2.set_title(
+        "Campaign coupon redemption rate (household-campaign pairs)",
+        fontsize=9,
+        color=INK,
+        loc="left",
+    )
+    _style(a2, grid_axis="y")
+    _fig_title(
+        fig,
+        "The coupon-using segment redeems campaign coupons about five times as often",
+        "Households with at least 10 baskets; redemption is descriptive, not a clustering input",
+    )
     return fig
