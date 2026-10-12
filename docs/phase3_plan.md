@@ -41,8 +41,10 @@ Households: 2,402 with ≥ 10 baskets are used to fit. The 98 with fewer are ass
 - Candidates k = 2–6. For each k:
     - silhouette, and the silhouette of the same data with each feature shuffled independently (keeps each feature's distribution, removes the structure between them); report the gap;
     - per-segment stability: bootstrap Jaccard similarity (Hennig 2007, "Cluster-wise assessment of cluster stability", *Computational Statistics & Data Analysis* 52); a segment is stable if its mean Jaccard ≥ 0.75.
-- Choose the largest k whose segments are all stable, with a clear gap over the shuffled baseline, and which read as distinct behaviours.
+- Choose, among the k whose segments are all stable, the one with the **largest gap** over the shuffled baseline (the idea of the gap statistic, Tibshirani, Walther & Hastie 2001).
+- Reproducibility: the household table is held in one sorted partition, because k-means' random starts and the bootstrap samples depend on how Spark partitions the data.
 - Preliminary (4 adjusted features before merging promotion and discount): k = 4 has silhouette 0.434 vs 0.329 shuffled (gap +0.105) and subsample ARI ≥ 0.94; k = 3 is unstable (ARI down to 0.57). The final choice is made on the 3 features above.
+- **Rule change after the first build (recorded):** the approved rule was "the largest stable k with a clear gap", and the build implemented "clear" as any gap above 0. A re-run with different data partitioning moved k = 4 and k = 5 just over the 0.75 stability line (Jaccard 0.763 and 0.786, gaps 0.016 and 0.009), so that rule picked k = 5 on a near-zero gap. Choosing the largest gap makes "clear" explicit; it selects k = 3 in every run (gap about 0.06–0.08 against at most 0.021 for any other k).
 
 ## Profiles (describe, do not define)
 

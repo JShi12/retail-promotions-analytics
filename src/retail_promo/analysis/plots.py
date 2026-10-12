@@ -245,6 +245,8 @@ def k_selection(summary: pd.DataFrame, chosen: int):
 
 def segment_centroids(centroids: pd.DataFrame):
     """Standardised centre of each segment on the three clustering inputs."""
+    if len(centroids) > len(SEGMENT_COLOURS):
+        raise ValueError("Plot style allows at most 3 colours; facet the chart for more segments.")
     names = {
         "deal_index": "Deal-proneness index",
         "pl_adjusted": "Own label (adjusted)",

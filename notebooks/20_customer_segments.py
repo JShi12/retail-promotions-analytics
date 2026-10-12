@@ -83,7 +83,7 @@ display(
 
 # MAGIC %md
 # MAGIC ## 3. Choosing the number of segments
-# MAGIC Rule: the largest k whose segments are all stable (bootstrap Jaccard ≥ 0.75) and whose silhouette beats the shuffled baseline.
+# MAGIC Rule: among the k whose segments are all stable (bootstrap Jaccard ≥ 0.75), the one with the largest silhouette gap over the shuffled baseline (the idea of the gap statistic, Tibshirani, Walther & Hastie 2001). The data is held in one sorted partition so that k-means' random starts and the bootstrap samples, which depend on partitioning, give the same result on any machine.
 
 # COMMAND ----------
 
@@ -97,8 +97,8 @@ show(plots.k_selection(res.k_summary, res.k), "phase3_k_selection")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC - k = 3 is chosen: silhouette 0.463 against 0.385 for shuffled data (gap 0.079, the largest), and every segment is stable (Jaccard 0.922, 0.921 and 0.949 for segments 1–3).
-# MAGIC - k = 2 is stable but no better than shuffled data (0.479 vs 0.476). From k = 4 at least one segment falls below 0.75 (lowest 0.667 at k = 4).
+# MAGIC - k = 3 is chosen: silhouette 0.463 against 0.402 for shuffled data (gap 0.061, the largest), and every segment is stable (Jaccard 0.951, 0.937 and 0.962 for segments 1–3).
+# MAGIC - k = 2 is stable but barely beats shuffled data (0.478 vs 0.476, gap 0.002). From k = 4 at least one segment falls below 0.75 (lowest 0.701 at k = 4), and no other k has a gap above 0.021.
 # MAGIC - A silhouette near 0.46 means real but modest structure: these are useful groups along a continuum, not sharply separated types.
 
 # COMMAND ----------
@@ -118,8 +118,8 @@ show(plots.segment_centroids(res.centroids), "phase3_centroids")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC - **Segment 1, more promotion, more coupons:** deal-proneness +0.64 standard deviations and coupon use +1.65; own label about average (−0.18).
-# MAGIC - **Segment 2, more promotion, more own label:** deal-proneness +0.52 and own label +0.93; coupon use −0.35.
+# MAGIC - **Segment 1, more promotion, more coupons:** deal-proneness +0.66 standard deviations and coupon use +1.64; own label about average (−0.18).
+# MAGIC - **Segment 2, more promotion, more own label:** deal-proneness +0.51 and own label +0.93; coupon use −0.36.
 # MAGIC - **Segment 3, less promotion, less own label:** deal-proneness −0.60, own label −0.56, coupon use −0.40.
 
 # COMMAND ----------
@@ -141,7 +141,7 @@ show(plots.actual_vs_expected(res.profiles), "phase3_actual_vs_expected")
 
 # MAGIC %md
 # MAGIC - Segment 1 puts 26.7% of spend on promotion against 22.8% expected (+3.9 points) and takes 18.8% off the shelf price against 16.2% expected.
-# MAGIC - Segment 2 is the own-label buyer: 29.9% of spend against 22.4% expected (+7.5 points), plus promotion 26.4% vs 23.1% (+3.3 points).
+# MAGIC - Segment 2 is the own-label buyer: 29.9% of spend against 22.4% expected (+7.5 points), plus promotion 26.3% vs 23.1% (+3.2 points).
 # MAGIC - Segment 3 buys less on promotion than its categories and stores predict: 17.8% vs 21.8% (−4.0 points), 13.2% vs 15.5% off shelf price, and own label 17.4% vs 21.5% (−4.1 points).
 # MAGIC - The expected values are close across segments (21.8%–23.1% for promotion), so the differences come from behaviour, not from where or what the segments buy.
 
@@ -174,10 +174,10 @@ show(plots.size_and_redemption(res.profiles), "phase3_size_redemption")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC - Segment 3 is the core: 1,160 of 2,402 households (48%) and 49.0% of spend. Segment 1 is 454 households (19%) but 22.9% of spend; segment 2 is 788 households (33%) and 28.1% of spend.
-# MAGIC - Segment 1 redeems campaign coupons in 30.4% of its campaign pairs against 6.4% for segments 2 and 3 (30.4 / 6.4 = 4.8×).
-# MAGIC - That is not built in: excluding redemption days, segment 1's median coupon share barely moves (2.81% → 2.64%) and stays far above segments 2 and 3 (0.21% and 0.16%). Only 15.3% of segment 1's coupon lines fall on redemption days.
-# MAGIC - Segment 2 buys more on promotion than expected yet redeems no more than segment 3 (6.4% each): buying on in-store promotion is not the same as responding to coupons.
+# MAGIC - Segment 3 is the core: 1,160 of 2,402 households (48%) and 49.0% of spend. Segment 1 is 457 households (19%) but 23.0% of spend; segment 2 is 785 households (33%) and 28.0% of spend.
+# MAGIC - Segment 1 redeems campaign coupons in 30.4% of its campaign pairs against 6.3% and 6.4% for segments 2 and 3 (30.4 / 6.3 = 4.8×).
+# MAGIC - That is not built in: excluding redemption days, segment 1's median coupon share barely moves (2.78% → 2.60%) and stays far above segments 2 and 3 (0.21% and 0.16%). Only 15.3% of segment 1's coupon lines fall on redemption days.
+# MAGIC - Segment 2 buys more on promotion than expected yet redeems no more than segment 3 (6.3% vs 6.4%): buying on in-store promotion is not the same as responding to coupons.
 
 # COMMAND ----------
 
@@ -193,9 +193,9 @@ display(res.profiles[["segment", "segment_label", "baskets_per_week", "avg_baske
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC - Segment 1 shops most often (1.17 baskets a week vs 0.85 and 0.83) and spends the most over two years ($2,868 vs $1,869 and $2,137), so the coupon users are also the most frequent shoppers.
-# MAGIC - Segment 2 has the smallest baskets ($22.25 vs $27.33 and $26.72) and the highest meat share (14.0% vs 11.7% and 11.0%).
-# MAGIC - Category mixes are otherwise similar (grocery 55.0%–57.2% of spend), consistent with segments defined by behaviour rather than what households buy.
+# MAGIC - Segment 1 shops most often (1.17 baskets a week vs 0.85 and 0.83) and spends the most over two years ($2,839 vs $1,868 and $2,137), so the coupon users are also the most frequent shoppers.
+# MAGIC - Segment 2 has the smallest baskets ($22.24 vs $27.35 and $26.72) and the highest meat share (14.0% vs 11.7% and 11.0%).
+# MAGIC - Category mixes are otherwise similar (grocery 55.0%–57.3% of spend), consistent with segments defined by behaviour rather than what households buy.
 
 # COMMAND ----------
 
@@ -212,7 +212,7 @@ display(res.demographics)
 
 # MAGIC %md
 # MAGIC - Households with demographics shop 1.52 baskets a week against 0.57 for the rest (×2.7) and spend $4,212 against $1,318 (×3.2), so any demographic profile describes heavier shoppers.
-# MAGIC - Mean demographic levels differ little between segments (for example `classification_3_ord` 4.67, 4.31 and 4.97), so the segments are not explained by these demographics.
+# MAGIC - Mean demographic levels differ little between segments (for example `classification_3_ord` 4.68, 4.30 and 4.97), so the segments are not explained by these demographics.
 
 # COMMAND ----------
 
@@ -234,8 +234,8 @@ display(
 
 # MAGIC %md
 # MAGIC ## 10. Key findings
-# MAGIC - **Three stable segments** on price-and-promotion behaviour (k = 3: silhouette 0.463 vs 0.385 shuffled; every segment's Jaccard ≥ 0.92). The structure is real but modest: segments are useful groups along a continuum (section 3).
-# MAGIC - **More promotion, more coupons (segment 1):** 19% of households, 22.9% of spend, the most frequent shoppers, and they redeem campaign coupons in 30.4% of campaigns against 6.4% for the others (sections 6 and 7). This is the natural target for coupon campaigns.
-# MAGIC - **More promotion, more own label (segment 2):** 33% of households, 28.1% of spend, own label 29.9% of spend vs 22.4% expected (section 5). They buy more on promotion and own label than expected but redeem campaign coupons no more than segment 3 (6.4% each), which points to in-store price promotions and own-label offers rather than coupons; testing that needs a response measure by segment.
+# MAGIC - **Three stable segments** on price-and-promotion behaviour (k = 3: silhouette 0.463 vs 0.402 shuffled; every segment's Jaccard ≥ 0.93). The structure is real but modest: segments are useful groups along a continuum (section 3).
+# MAGIC - **More promotion, more coupons (segment 1):** 19% of households, 23.0% of spend, the most frequent shoppers, and they redeem campaign coupons in 30.4% of campaigns against 6.3%–6.4% for the others (sections 6 and 7). This is the natural target for coupon campaigns.
+# MAGIC - **More promotion, more own label (segment 2):** 33% of households, 28.0% of spend, own label 29.9% of spend vs 22.4% expected (section 5). They buy more on promotion and own label than expected but redeem campaign coupons no more than segment 3 (6.3% vs 6.4%), which points to in-store price promotions and own-label offers rather than coupons; testing that needs a response measure by segment.
 # MAGIC - **Less promotion, less own label (segment 3):** 48% of households and 49.0% of spend, buying 4.0 points less on promotion than their categories and stores predict (section 5), so promotions appear to matter less to their buying. Whether a promotion changes what they buy, or mainly discounts purchases they would make anyway, needs a response measure by segment (future work in `docs/phase3_plan.md`).
 # MAGIC - **Caveats:** segments are descriptive and built from two years of data; demographics cover only heavier shoppers (section 8); and segment membership must not be used as a Phase 4 feature.

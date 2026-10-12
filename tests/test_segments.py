@@ -88,9 +88,13 @@ def test_fit_best_recovers_separated_clusters(spark):
 
 def test_pick_k_and_labels():
     summary = pd.DataFrame(
-        {"k": [2, 3, 4], "all_stable": [True, True, False], "gap": [0.003, 0.08, 0.02]}
+        {
+            "k": [2, 3, 4, 5],
+            "all_stable": [True, True, False, True],
+            "gap": [0.003, 0.08, 0.02, 0.009],
+        }
     )
-    assert sg.pick_k(summary) == 3
+    assert sg.pick_k(summary) == 3  # largest gap among stable k, not the largest stable k
     with pytest.raises(ValueError):
         sg.pick_k(summary.assign(all_stable=False))
     assert sg.short_label(np.array([0.6, -0.2, 1.6])) == "More promotion, more coupons"

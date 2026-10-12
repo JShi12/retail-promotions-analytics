@@ -68,9 +68,15 @@ def coupon_check(io: TableIO, assigned: pd.DataFrame) -> pd.DataFrame:
 
 def run(spark: SparkSession, io: TableIO, n_boot: int = 20) -> Phase3Results:
     hf = io.read("gold", "household_features")
-    behaviour = sg.household_behaviour(
+    # Serverless compute does not allow .cache(). The behaviour table is small (one row per
+    # household), so compute it once from the transactions and hand Spark an in-memory copy:
+    # every k-means refit then reads that copy instead of recomputing from 2.6M lines.
+    behaviour_pd = sg.household_behaviour(
         io.read("silver", "transactions"), io.read("silver", "products"), hf
-    ).cache()
+    ).toPandas()
+    # One partition, sorted: k-means' random starts and the bootstrap samples depend on how the
+    # data is partitioned, so this makes results identical locally and on Databricks.
+    behaviour = spark.createDataFrame(behaviour_pd.sort_values("household_key")).coalesce(1)
     k_summary, k_segments = sg.choose_k(
         spark, behaviour.filter(~F.col("low_activity")), n_boot=n_boot
     )

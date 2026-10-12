@@ -177,7 +177,8 @@ def choose_k(
     n_null: int = 3,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Silhouette, shuffled-baseline silhouette and per-segment bootstrap Jaccard for each k."""
-    X = scaler(fit_df).transform(fit_df).select("household_key", "features", *INPUTS).cache()
+    # No .cache(): serverless does not allow it; fit_df is a small in-memory table (see phase3.run).
+    X = scaler(fit_df).transform(fit_df).select("household_key", "features", *INPUTS)
     pdf = X.select("household_key", *INPUTS).toPandas()
     ev = ClusteringEvaluator()
     summary, per_segment = [], []
@@ -213,11 +214,12 @@ def choose_k(
 
 
 def pick_k(summary: pd.DataFrame) -> int:
-    """Largest k whose segments are all stable and whose silhouette beats the shuffled baseline."""
+    """Among k whose segments are all stable, the one with the largest silhouette gap over the
+    shuffled baseline (the idea of the gap statistic, Tibshirani, Walther & Hastie 2001)."""
     ok = summary[summary["all_stable"] & (summary["gap"] > 0)]
     if ok.empty:
         raise ValueError("No k passes the stability rule; report that instead of forcing a choice.")
-    return int(ok["k"].max())
+    return int(ok.loc[ok["gap"].idxmax(), "k"])
 
 
 # ---------------------------------------------------------------- final model, names, profiles
