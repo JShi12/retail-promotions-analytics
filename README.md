@@ -43,6 +43,11 @@ docs/               Phase plans (docs/phase1_plan.md, docs/phase2_plan.md, docs/
 reports/figures/    Saved figures (aggregates only)
 ```
 
+Notebook numbering: `00`–`04` are the pipeline and run in order (setup, bronze, silver, gold,
+data-quality report). Analysis notebooks are numbered in tens by phase: `10` promotion
+effectiveness (Phase 2), `20` customer segments (Phase 3), `30` for Phase 4. Each reads only the
+gold tables, and the gaps leave room for follow-ups (e.g. `11_...`) without renumbering.
+
 ## Local setup
 
 ```bash
