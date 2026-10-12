@@ -24,12 +24,14 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "..", "src")))
 
 from retail_promo import pipeline
+from retail_promo._version import check_fresh
 from retail_promo.config import Settings
 from retail_promo.io import UnityCatalogIO
 
 dbutils.widgets.text("catalog", "retail")
 dbutils.widgets.text("run_id", "")  # a job passes one id to every task; blank = new id
 settings = Settings(catalog=dbutils.widgets.get("catalog"))
+check_fresh()  # stops if this session is running code older than the Git folder
 run_id = dbutils.widgets.get("run_id") or pipeline.new_run_id()
 io = UnityCatalogIO(spark, settings.catalog, settings.landing_dir)
 print("run_id:", run_id)

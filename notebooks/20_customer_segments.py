@@ -38,15 +38,20 @@ import sys
 
 REPO = os.path.abspath(os.path.join(os.getcwd(), ".."))
 sys.path.insert(0, os.path.join(REPO, "src"))
-FIG_DIR = os.path.join(REPO, "reports", "figures")
 
 from retail_promo import pipeline
+from retail_promo._version import check_fresh
 from retail_promo.analysis import phase3, plots
 from retail_promo.config import Settings
 from retail_promo.io import UnityCatalogIO
 
 dbutils.widgets.text("catalog", "retail")
 settings = Settings(catalog=dbutils.widgets.get("catalog"))
+check_fresh()  # stops if this session is running code older than the Git folder
+# Figures go to a Unity Catalog volume, not the Git folder (the copies in reports/figures/
+# come from the local run of the same code).
+spark.sql(f"CREATE VOLUME IF NOT EXISTS {settings.catalog}.ops.figures")
+FIG_DIR = f"/Volumes/{settings.catalog}/ops/figures"
 io = UnityCatalogIO(spark, settings.catalog, settings.landing_dir)
 
 res = phase3.run(spark, io)

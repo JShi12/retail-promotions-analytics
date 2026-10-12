@@ -68,7 +68,13 @@ JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.run_local \
   --out-dir data/processed
 ```
 
-Phase 2 locally (needs the local pipeline run above; writes figures to `reports/figures/`):
+The data (about 850 MB of CSV) is small enough for local Spark, so every phase also runs on a
+laptop with the same `src/` code, writing Parquet instead of Delta. These local runs are the
+development loop and **the source of the figures committed in `reports/figures/`**; the Databricks
+runs reproduce their numbers exactly and save their own figures to the Unity Catalog volume
+`ops/figures`, so they never write into the Git folder.
+
+Phase 2 and 3 locally (need the local pipeline run above; write figures to `reports/figures/`):
 
 ```bash
 JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase2_local
@@ -89,6 +95,10 @@ to start.
 4. Re-run the last cell of `00_setup` to confirm all files are present, then run `01_bronze`,
    `02_silver`, `03_gold` and `04_dq_report` in order. `01_bronze` starts a run; the next two pick
    up its `run_id` automatically (or pass one in the `run_id` widget, as a job does).
+After pulling new commits into the Git folder, detach and reattach the notebook before running:
+a live Python session keeps the code it first imported. Notebooks print a `code fingerprint` and
+stop if the session is stale; compare it with `uv run python -c "import retail_promo; print(retail_promo.CODE_FINGERPRINT)"` locally.
+
 5. Phase 2: run `10_promo_effectiveness`. Its first cell installs `pyfixest` from PyPI.
 6. Phase 3: run `20_customer_segments` (several minutes: k selection refits k-means many times).
 
