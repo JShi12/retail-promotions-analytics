@@ -4,8 +4,9 @@ Promotion effectiveness, customer segmentation and coupon-response targeting for
 retailer, built as a Databricks medallion pipeline (Delta + Unity Catalog) in PySpark on
 dunnhumby's *The Complete Journey* (2,500 households, ~2 years, 2.6M transaction lines).
 
-> Status: Phase 0 complete. Phase 1 pipeline built and verified locally (all 49 DQ checks pass on the
-> full data); the Databricks run is pending. Analysis results will be added as phases land.
+> Status: Phases 0–2 complete. The pipeline and the promotion-effectiveness analysis have run on
+> Databricks Free Edition with no failed data-quality checks, and every estimate matches the local run.
+> Phases 3–5 are next.
 
 ## Questions
 
@@ -18,8 +19,8 @@ dunnhumby's *The Complete Journey* (2,500 households, ~2 years, 2.6M transaction
 | Phase | Deliverable | Status |
 |---|---|---|
 | 0 | Setup, data download and inspection, column dictionary ([data/README.md](data/README.md)) | done |
-| 1 | Medallion pipeline: bronze → silver (typed, deduplicated, flag-don't-drop, `dq_log`) → gold; DQ checks; pytest; CI | local run passed; Databricks run pending |
-| 2 | Promotion effectiveness: fixed-effects Poisson models of weekly units on mailer and display, by category, with sensitivity and timing checks ([plan](docs/phase2_plan.md)) | built and run locally; Databricks run pending |
+| 1 | Medallion pipeline: bronze → silver (typed, deduplicated, flag-don't-drop, `dq_log`) → gold; DQ checks; pytest; CI | done: run on Databricks; no failed checks |
+| 2 | Promotion effectiveness: fixed-effects Poisson models of weekly units on mailer and display, by category, with sensitivity and timing checks ([plan](docs/phase2_plan.md)) | done: run on Databricks; every estimate matches the local run |
 | 3 | Segmentation: Spark MLlib k-means on household features; k by silhouette and seed stability | planned |
 | 4 | Campaign response classifier: pre-campaign features, household-grouped folds, baselines, tuned GBT, importance, targeting curve | planned |
 | 5 | Dashboard on gold tables, scheduled Databricks job, commercial README, REPORT.md | planned |
