@@ -97,8 +97,8 @@ show(plots.k_selection(res.k_summary, res.k), "phase3_k_selection")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC - k = 3 is chosen: silhouette 0.463 against 0.402 for shuffled data (gap 0.061, the largest), and every segment is stable (Jaccard 0.951, 0.937 and 0.962 for segments 1–3).
-# MAGIC - k = 2 is stable but barely beats shuffled data (0.478 vs 0.476, gap 0.002). From k = 4 at least one segment falls below 0.75 (lowest 0.701 at k = 4), and no other k has a gap above 0.021.
+# MAGIC - k = 3 is chosen: silhouette 0.463 against 0.402 for shuffled data (gap 0.060, the largest), and every segment is stable (Jaccard 0.951, 0.937 and 0.962 for segments 1–3).
+# MAGIC - k = 2 is stable but barely beats shuffled data (0.478 vs 0.477, gap 0.001). From k = 4 at least one segment falls below 0.75 (lowest 0.701 at k = 4), and no other k has a gap above 0.019.
 # MAGIC - A silhouette near 0.46 means real but modest structure: these are useful groups along a continuum, not sharply separated types.
 
 # COMMAND ----------

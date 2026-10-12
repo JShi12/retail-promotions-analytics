@@ -179,7 +179,11 @@ def choose_k(
     """Silhouette, shuffled-baseline silhouette and per-segment bootstrap Jaccard for each k."""
     # No .cache(): serverless does not allow it; fit_df is a small in-memory table (see phase3.run).
     X = scaler(fit_df).transform(fit_df).select("household_key", "features", *INPUTS)
-    pdf = X.select("household_key", *INPUTS).toPandas()
+    pdf = (
+        X.select("household_key", *INPUTS)
+        .toPandas()
+        .sort_values("household_key", ignore_index=True)
+    )
     ev = ClusteringEvaluator()
     summary, per_segment = [], []
     for k in ks:
@@ -187,7 +191,8 @@ def choose_k(
         full = _labels(model, X)
         null_sil = []
         for r in range(n_null):
-            sdf = spark.createDataFrame(shuffled(pdf, INPUTS, seed=r))
+            # One partition, like the real data, so the baseline is the same on any machine.
+            sdf = spark.createDataFrame(shuffled(pdf, INPUTS, seed=r)).coalesce(1)
             XS = scaler(sdf).transform(sdf)
             null_sil.append(ev.evaluate(fit_best(XS, k).transform(XS)))
         jac = {c: [] for c in sorted(full.unique())}
