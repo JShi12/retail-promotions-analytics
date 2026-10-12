@@ -15,9 +15,11 @@ Data: `gold.campaign_household`, one row per household per campaign received (7,
 | Campaign identity alone | each campaign's own redemption rate as the score: pooled AUC 0.637 | pooled AUC partly measures which campaign, not which household → judge within campaign |
 | "Relevance" (pre-campaign spend share on the campaign's coupon products) | pooled AUC 0.642, within-campaign 0.551 | mostly a campaign-level signal |
 | Redemption by type × prior redemption | TypeA 47.7% vs 10.5%; TypeB 17.4% vs 4.1%; TypeC 16.2% vs 3.2% | interactions → a tree model may add value |
-| Drift over time (campaign start day) | redemption rate 7.5% (< 400) → 16.4% (500–586) → 9.3% (≥ 587); share with a prior redemption 6% → 44%; 65% of pairs before day 400 have no earlier campaign | history features mean less early on; time-forward test is essential |
+| Drift over time (campaign start day) | redemption rate 7.5% (< 400) → 14.8% (500–586) → 14.0% (≥ 587); share with a prior redemption 6.0% → 35.4%; 65% of pairs before day 400 have no earlier campaign | history features mean less early on; time-forward test is essential |
 | Who gets campaigns | targeted households: 1.30 baskets/week, $3,199 spend; never targeted: 0.35, $696 (medians) | results apply only to households the retailer already targets |
 | Correlated features | coupon share ~ coupon discount 0.88; prior redemptions ~ has prior redemption 0.99; relevance share ~ amount 0.91; spend ~ products 0.92; baskets ~ baskets/week 0.90 | permute feature groups for importance |
+
+Correction: the review first reported 16.4% / 9.3% / 44% for the drift row, from a binning error that put campaign 18 (start day 587) in the wrong period; the figures above are from the build's drift table.
 
 ## Features (all from before the campaign start)
 

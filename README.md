@@ -22,7 +22,7 @@ dunnhumby's *The Complete Journey* (2,500 households, ~2 years, 2.6M transaction
 | 1 | Medallion pipeline: bronze → silver (typed, deduplicated, flag-don't-drop, `dq_log`) → gold; DQ checks; pytest; CI | done: run on Databricks; no failed checks |
 | 2 | Promotion effectiveness: fixed-effects Poisson models of weekly units on mailer and display, by category, with sensitivity and timing checks ([plan](docs/phase2_plan.md)) | done: run on Databricks; every estimate matches the local run |
 | 3 | Segmentation: Spark MLlib k-means on price-and-promotion behaviour (category- and store-adjusted), k by bootstrap stability and a shuffled baseline ([plan](docs/phase3_plan.md)) | done: run on Databricks; results match the local run exactly |
-| 4 | Campaign response classifier: pre-campaign features, household-grouped folds, baselines, tuned GBT, importance, targeting curve | planned |
+| 4 | Coupon campaign response: Spark MLlib logistic regression (L1) and gradient-boosted trees with nested household-grouped CV, judged within campaign against a coupon-share rule; time-forward check and targeting curve ([plan](docs/phase4_plan.md)) | built and run locally; Databricks run pending |
 | 5 | Dashboard on gold tables, scheduled Databricks job, commercial README, REPORT.md | planned |
 | Stretch | Re-run on dunnhumby "Let's Get Sort-of-Real" (~300M rows) for scale | optional |
 
@@ -39,7 +39,7 @@ src/retail_promo/   PySpark transforms (bronze/silver/gold, dq, features), unit-
 notebooks/          Thin Databricks notebooks that call src/ (via a Databricks Git folder)
 tests/              pytest on local Spark with synthetic data
 data/README.md      Column dictionary and data findings (raw data is gitignored)
-docs/               Phase plans (docs/phase1_plan.md, docs/phase2_plan.md, docs/phase3_plan.md)
+docs/               Phase plans (docs/phase1_plan.md … docs/phase4_plan.md)
 reports/figures/    Saved figures (aggregates only)
 ```
 
@@ -79,6 +79,7 @@ Phase 2 and 3 locally (need the local pipeline run above; write figures to `repo
 ```bash
 JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase2_local
 JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase3_local   # Phase 3, ~10 min
+JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase4_local   # Phase 4, ~15 min
 ```
 
 ## Running on Databricks (Free Edition)
@@ -101,6 +102,7 @@ stop if the session is stale; compare it with `uv run python -c "import retail_p
 
 5. Phase 2: run `10_promo_effectiveness`. Its first cell installs `pyfixest` from PyPI.
 6. Phase 3: run `20_customer_segments` (several minutes: k selection refits k-means many times).
+7. Phase 4: run `30_coupon_response` (several minutes: nested cross-validation fits about 240 models).
 
 ## Pipeline (Phase 1)
 

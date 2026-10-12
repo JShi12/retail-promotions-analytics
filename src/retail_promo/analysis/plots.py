@@ -340,3 +340,136 @@ def size_and_redemption(profiles: pd.DataFrame):
         "Households with at least 10 baskets; redemption is descriptive, not a clustering input",
     )
     return fig
+
+
+# ---------------------------------------------------------------- Phase 4
+
+MODEL_NAMES = {"logistic_l1": "Logistic regression (L1)", "gbt": "Gradient-boosted trees"}
+
+
+def _nice(name: str) -> str:
+    return MODEL_NAMES.get(name, name)
+
+
+def model_comparison(summary: pd.DataFrame, best: str):
+    """Within-campaign AUC, mean ± SD over household-grouped folds, for rules and models."""
+    s = summary.sort_values("auc_within_mean")
+    fig, ax = plt.subplots(figsize=(7.2, 2.8))
+    y = np.arange(len(s))
+    colours = [GREY if n.startswith("rule") else BLUE for n in s["scorer"]]
+    ax.hlines(
+        y,
+        s["auc_within_mean"] - s["auc_within_std"],
+        s["auc_within_mean"] + s["auc_within_std"],
+        color=colours,
+        lw=1.5,
+    )
+    ax.scatter(s["auc_within_mean"], y, color=colours, s=36, zorder=3)
+    for yi, (m, sd) in enumerate(zip(s["auc_within_mean"], s["auc_within_std"], strict=True)):
+        ax.text(m + sd + 0.004, yi, f"{m:.3f} ± {sd:.3f}", va="center", fontsize=8, color=INK)
+    ax.set_yticks(y, [_nice(n) for n in s["scorer"]], fontsize=9, color=INK)
+    ax.set_xlabel("ROC AUC within campaign (0.5 = random)", fontsize=9, color=MUTED)
+    lo = (s["auc_within_mean"] - s["auc_within_std"]).min()
+    ax.set_xlim(lo - 0.02, (s["auc_within_mean"] + s["auc_within_std"]).max() + 0.06)
+    _style(ax)
+    b = s.set_index("scorer").loc[best, "auc_within_mean"]
+    r = s.set_index("scorer").loc["rule: coupon share", "auc_within_mean"]
+    _title(ax, f"{_nice(best)}: {b:.3f} within-campaign AUC vs {r:.3f} for the coupon-share rule",
+           "Mean ± SD over 5 household-grouped folds; grey = single-feature rules")  # fmt: skip
+    return fig
+
+
+def capture_curve(curve: pd.DataFrame, best: str):
+    """Share of redemptions captured by sending each campaign to its top X% of households."""
+    mcol = f"model: {best}"
+    fig, ax = plt.subplots(figsize=(7.2, 3.6))
+    x = curve["share_targeted"]
+    ax.plot(x, curve["random"], ls="--", color=GREY, lw=1.2, label="Random")
+    ax.plot(
+        x, curve["rule: coupon share"], "o-", color=ORANGE, lw=1.5, ms=4, label="Rule: coupon share"
+    )
+    ax.plot(x, curve[mcol], "o-", color=BLUE, lw=1.5, ms=4, label=_nice(best))
+    at = curve.set_index("share_targeted").loc[0.2]
+    ax.annotate(
+        f"{at[mcol]:.0%}",
+        (0.2, at[mcol]),
+        textcoords="offset points",
+        xytext=(-6, 8),
+        ha="right",
+        fontsize=8,
+        color=INK,
+    )
+    ax.annotate(
+        f"{at['rule: coupon share']:.0%}",
+        (0.2, at["rule: coupon share"]),
+        textcoords="offset points",
+        xytext=(8, -12),
+        fontsize=8,
+        color=INK,
+    )
+    ax.xaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0%}"))
+    ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: f"{v:.0%}"))
+    ax.set_xlabel(
+        "Share of each campaign's households targeted (highest scores first)",
+        fontsize=9,
+        color=MUTED,
+    )
+    ax.set_ylabel("Share of redemptions captured", fontsize=9, color=MUTED)
+    ax.legend(frameon=False, fontsize=8, loc="lower right")
+    _style(ax, grid_axis="both")
+    _title(ax, f"Targeting the top 20% captures {at[mcol]:.0%} of redemptions ({at['rule: coupon share']:.0%} by coupon share)",
+           "Out-of-fold scores; each campaign sent to its top X% of eligible households")  # fmt: skip
+    return fig
+
+
+def importance(imp: pd.DataFrame, best: str):
+    """Drop in within-campaign AUC when a feature group is shuffled within campaign (held-out folds)."""
+    d = (
+        imp[imp["model"] == best]
+        .groupby("group")["auc_drop"]
+        .agg(["mean", "std"])
+        .sort_values("mean")
+    )
+    fig, ax = plt.subplots(figsize=(7.2, 3.8))
+    y = np.arange(len(d))
+    ax.barh(y, d["mean"], color=BLUE, height=0.6)
+    ax.errorbar(d["mean"], y, xerr=d["std"], fmt="none", ecolor=INK, lw=0.8, capsize=2)
+    ax.axvline(0, color=GREY, lw=0.8)
+    ax.set_yticks(y, d.index, fontsize=9, color=INK)
+    ax.set_xlabel("Drop in within-campaign AUC when the group is shuffled", fontsize=9, color=MUTED)
+    _style(ax)
+    top = d.index[-1]
+    _title(ax, f"'{top.capitalize()}' carries most of the model's ranking power",
+           f"{_nice(best)}; mean ± SD over 5 held-out folds; correlated features shuffled together")  # fmt: skip
+    return fig
+
+
+def time_forward(tf: pd.DataFrame):
+    """Model vs coupon-share rule on later campaigns, after training on earlier ones."""
+    d = tf[tf["campaign"] != "ALL"].sort_values("redeemed")
+    allrow = tf[tf["campaign"] == "ALL"].iloc[0]
+    fig, ax = plt.subplots(figsize=(7.2, 3.4))
+    y = np.arange(len(d))
+    ax.scatter(d["rule_auc"], y + 0.12, color=ORANGE, s=30, label="Rule: coupon share", zorder=3)
+    ax.scatter(d["model_auc"], y - 0.12, color=BLUE, s=30, label="Model", zorder=3)
+    ax.axvline(0.5, color=GREY, lw=0.8, ls="--")
+    labels = [
+        f"Campaign {c} ({t}, {r} redeemed)"
+        for c, t, r in zip(d["campaign"], d["campaign_type"], d["redeemed"], strict=True)
+    ]
+    ax.set_yticks(y, labels, fontsize=8.5, color=INK)
+    ax.set_xlabel("ROC AUC within the campaign (0.5 = random)", fontsize=9, color=MUTED)
+    ax.legend(frameon=False, fontsize=8, loc="upper left")
+    _style(ax)
+    _title(ax, f"On later campaigns: model {allrow['model_auc']:.3f} vs rule {allrow['rule_auc']:.3f} within-campaign AUC",
+           f"Trained on campaigns ended before day 587; tested on campaigns starting on or after it ({allrow['redeemed']} redemptions)")  # fmt: skip
+    return fig
+
+
+def phase4_figures(res) -> dict:
+    return {
+        "phase4_model_comparison": model_comparison(res.summary, res.best_model),
+        "phase4_capture_curve": capture_curve(res.capture_curve, res.best_model),
+        "phase4_importance": importance(res.importance, res.best_model),
+        "phase4_time_forward": time_forward(res.time_forward),
+    }
