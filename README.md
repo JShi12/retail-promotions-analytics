@@ -4,9 +4,9 @@ Promotion effectiveness, customer segmentation and coupon-response targeting for
 retailer, built as a Databricks medallion pipeline (Delta + Unity Catalog) in PySpark on
 dunnhumby's *The Complete Journey* (2,500 households, ~2 years, 2.6M transaction lines).
 
-> Status: Phases 0–2 complete. The pipeline and the promotion-effectiveness analysis have run on
-> Databricks Free Edition with no failed data-quality checks, and every estimate matches the local run.
-> Phases 3–5 are next.
+> Status: Phases 0–3 complete. The pipeline, the promotion-effectiveness analysis and the customer
+> segmentation have run on Databricks Free Edition with no failed data-quality checks, and every
+> result matches the local run. Phases 4–5 are next.
 
 ## Questions
 
@@ -21,7 +21,7 @@ dunnhumby's *The Complete Journey* (2,500 households, ~2 years, 2.6M transaction
 | 0 | Setup, data download and inspection, column dictionary ([data/README.md](data/README.md)) | done |
 | 1 | Medallion pipeline: bronze → silver (typed, deduplicated, flag-don't-drop, `dq_log`) → gold; DQ checks; pytest; CI | done: run on Databricks; no failed checks |
 | 2 | Promotion effectiveness: fixed-effects Poisson models of weekly units on mailer and display, by category, with sensitivity and timing checks ([plan](docs/phase2_plan.md)) | done: run on Databricks; every estimate matches the local run |
-| 3 | Segmentation: Spark MLlib k-means on price-and-promotion behaviour (category- and store-adjusted), k by bootstrap stability and a shuffled baseline ([plan](docs/phase3_plan.md)) | built and run locally; Databricks run pending |
+| 3 | Segmentation: Spark MLlib k-means on price-and-promotion behaviour (category- and store-adjusted), k by bootstrap stability and a shuffled baseline ([plan](docs/phase3_plan.md)) | done: run on Databricks; results match the local run exactly |
 | 4 | Campaign response classifier: pre-campaign features, household-grouped folds, baselines, tuned GBT, importance, targeting curve | planned |
 | 5 | Dashboard on gold tables, scheduled Databricks job, commercial README, REPORT.md | planned |
 | Stretch | Re-run on dunnhumby "Let's Get Sort-of-Real" (~300M rows) for scale | optional |
