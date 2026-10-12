@@ -7,6 +7,7 @@
 # MAGIC - *Product-week panel* (`gold.product_week_panel`): one row per product per week, weeks 9–101, products bought in at least 26 of those weeks, with units bought by the 2,500 panel households and promotion exposure. Weeks with no sales are kept as zeros.
 # MAGIC - *Mailer-week lift*: the % change in a product's weekly units in weeks it is in the mailer. Mailer weeks usually also carry a price cut and sometimes a display, and price cannot be controlled for in weeks without sales, so this is the lift of the whole promotion event that comes with a mailer feature.
 # MAGIC - *In-store display lift*: approximately the % lift in the stores that have the display. The panel records the traffic-weighted share of stores with a display; because units add up over stores, the model coefficient on that share approximates the in-store lift.
+# MAGIC - *Discount depth*: the loyalty-card discount as a % of the shelf price (the price before the discount), i.e. how much was taken off; 0% = full price. Example from the dunnhumby user guide: $3.34 of shelf value sold for $2.00, so the depth is 1.34 / 3.34 = 40%. The panel column `avg_discount_depth` is this % for one product in one week: total loyalty discount ÷ total shelf value over that week's purchases. It is missing in weeks without sales.
 # MAGIC - *Fixed effects*: a separate baseline for each product (its normal sales level) and for each category in each week (seasonality and the household ramp-up), so a promoted week is compared with the same product's other weeks.
 # MAGIC - *Poisson pseudo-maximum likelihood (PPML)*: the count regression used for weekly units; it keeps zero-sales weeks. Standard errors are clustered by product and by week.
 # MAGIC
@@ -105,7 +106,9 @@ display(phase2.estimate_table(res, "product", "pooled"))
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC "None" means no display and no mailer in any store that week; the causal data records nothing else. Price discounts are not part of that definition, so the table below shows how often weeks with sales still carry a loyalty-card discount, and how deep it is (share of shelf value).
+# MAGIC "None" means no display and no mailer in any store that week; the causal data records nothing else. Price discounts are not part of that definition, so the table below shows, for weeks with sales, how often a loyalty-card discount was given and how big it was:
+# MAGIC - `share_with_discount`: share of product-weeks with `avg_discount_depth` above 0 (any discount).
+# MAGIC - `mean_depth` / `median_depth`: the mean and median of `avg_discount_depth` across the product-weeks in that row, i.e. the average and typical % off the shelf price, counting full-price weeks as 0%.
 
 # COMMAND ----------
 
@@ -120,7 +123,7 @@ show(plots.raw_vs_model(res.raw_contrast, res.results), "phase2_raw_vs_model")
 # MAGIC %md
 # MAGIC - Raw averages: mailer-only product-weeks sell 8.15 units vs 1.58 in unpromoted weeks, a ratio of 5.16, i.e. +416%.
 # MAGIC - With product and category-week fixed effects the mailer-week lift is +84.4% (95% CI +75.3% to +94.1%). The raw contrast is about five times larger (416 / 84.4 = 4.9) because the products that get promoted sell more anyway.
-# MAGIC - The "unpromoted" baseline is not discount-free: 39.0% of its weeks with sales carry a loyalty discount (mean depth 7.5%, median 0%). Mailer-only weeks carry one 91.2% of the time, with a mean depth of 26.5%, so the mailer-week lift bundles the feature with a deeper price cut.
+# MAGIC - The "unpromoted" baseline is not discount-free: 39.0% of its weeks with sales carry a loyalty discount. Averaged over all its weeks with sales, full-price weeks counting as 0%, that is 7.5% off the shelf price (`mean_depth`; `median_depth` 0%, so most have no discount). Mailer-only weeks carry a discount 91.2% of the time and average 26.5% off, so the mailer-week lift bundles the feature with a deeper price cut.
 # MAGIC - Every later estimate uses the fixed-effects model.
 
 # COMMAND ----------
@@ -211,7 +214,7 @@ show(plots.timing(res.results), "phase2_timing")
 
 # MAGIC %md
 # MAGIC ## 8. Discount depth (descriptive)
-# MAGIC Ordinary least squares (OLS) of log units on display, mailer and discount depth, weeks with sales only. Descriptive: it conditions on a purchase having happened, and depth is computed from the same transactions as units, so it is not a price elasticity.
+# MAGIC Ordinary least squares (OLS) of log units on display, mailer and `avg_discount_depth` (% off the shelf price, see Key terms), weeks with sales only. Descriptive: it conditions on a purchase having happened, and depth is computed from the same transactions as units, so it is not a price elasticity.
 
 # COMMAND ----------
 
@@ -220,7 +223,7 @@ display(phase2.estimate_table(res, "depth_descriptive"))
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC - In weeks with sales, +10 percentage points of discount depth goes with +11.5% (+10.9% to +12.2%) more units, holding mailer and display fixed.
+# MAGIC - In weeks with sales, 10 more percentage points off the shelf price (e.g. 10% → 20% off) goes with +11.5% (+10.9% to +12.2%) more units, holding mailer and display fixed.
 
 # COMMAND ----------
 
