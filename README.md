@@ -60,7 +60,7 @@ raw CSVs ──► bronze ──► silver ──► gold ──► analysis not
 | Promotion effectiveness (`10`) | Fixed-effects Poisson regression of weekly product units on mailer and display exposure, by category, with timing checks and seven sensitivity variants (pyfixest). |
 | Customer segments (`20`) | Spark MLlib k-means on behaviour measured against category × store benchmarks; number of segments chosen by bootstrap stability and a shuffled-data baseline. |
 | Coupon targeting (`30`) | Logistic regression and gradient-boosted trees (scikit-learn) with nested, household-grouped cross-validation, judged within each campaign against a simple rule, plus a time-forward test. |
-| Dashboard (`40`) | SQL views in a `dashboard` schema; the dashboard itself is built from the guide. |
+| Dashboard (`40`) | SQL views in a `dashboard` schema; the dashboard definition (queries and layout, no data) is versioned as [`Retail promotions.lvdash.json`](Retail%20promotions.lvdash.json). |
 | Orchestration | A scheduled Databricks job runs everything in order ([jobs/retail_pipeline.yml](jobs/retail_pipeline.yml), [setup](docs/job_setup.md)); a full run took 46 minutes on Free Edition serverless. |
 | Quality | Logic lives in `src/` and is unit-tested with pytest on local Spark; GitHub Actions runs lint and tests on every push. |
 
@@ -97,6 +97,7 @@ docs/               phase plans, dashboard and job guides
 data/README.md      column dictionary and data findings (raw data is gitignored)
 reports/figures/    figures (aggregates only)
 REPORT.md           findings for a pricing and promotions manager
+Retail promotions.lvdash.json   Databricks AI/BI dashboard definition (queries and layout)
 ```
 
 Notebook numbering: `00`–`04` are the pipeline and run in order; analysis notebooks are numbered in
