@@ -46,7 +46,7 @@ raw CSVs ──► bronze ──► silver ──► gold ──► analysis not
 | Customer segments (`20`) | Spark MLlib k-means on behaviour measured against category × store benchmarks; number of segments chosen by bootstrap stability and a shuffled-data baseline. |
 | Coupon targeting (`30`) | Logistic regression and gradient-boosted trees (scikit-learn) with nested, household-grouped cross-validation, judged within each campaign against a simple rule, plus a time-forward test. |
 | Dashboard (`40`) | SQL views in a `dashboard` schema; the dashboard itself is built from the guide. |
-| Orchestration | A scheduled Databricks job runs everything in order ([jobs/retail_pipeline.yml](jobs/retail_pipeline.yml), [setup](docs/job_setup.md)). |
+| Orchestration | A scheduled Databricks job runs everything in order ([jobs/retail_pipeline.yml](jobs/retail_pipeline.yml), [setup](docs/job_setup.md)); a full run took 46 minutes on Free Edition serverless. |
 | Quality | Logic lives in `src/` and is unit-tested with pytest on local Spark; GitHub Actions runs lint and tests on every push. |
 
 **Tools:** PySpark 4.2, Delta Lake, Unity Catalog, Databricks Free Edition (serverless), Spark MLlib
@@ -66,7 +66,7 @@ right tool (Spark MLlib's boosted trees ran for over an hour on serverless for t
 | 2 | Promotion effectiveness ([plan](docs/phase2_plan.md)) | done, run on Databricks |
 | 3 | Customer segmentation ([plan](docs/phase3_plan.md)) | done, run on Databricks |
 | 4 | Coupon campaign response model ([plan](docs/phase4_plan.md)) | done, run on Databricks |
-| 5 | Dashboard, scheduled job, README and report ([plan](docs/phase5_plan.md)) | views, job definition and report built; dashboard and job run pending |
+| 5 | Dashboard, scheduled job, README and report ([plan](docs/phase5_plan.md)) | job run on Databricks (46 min); dashboard pending |
 | Stretch | Re-run on dunnhumby "Let's Get Sort-of-Real" (~300M rows) for scale | optional |
 
 Every Databricks result so far matches the local run of the same code exactly.

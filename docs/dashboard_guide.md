@@ -9,11 +9,29 @@ numbers as the notebooks. Menu names below may differ slightly in your workspace
 1. Run `40_dashboard_views` once (or the job), so the views exist.
 2. In your **Git folder**, *Create → Dashboard* (creating it inside the Git folder stores it as a
    `.lvdash.json` file that can be committed). Name it `Retail promotions`.
-3. **Data** tab → *Create from SQL*, one dataset per view, named like the view:
-   `SELECT * FROM retail.dashboard.<view>` for `kpi_headline`, `weekly_kpis`, `mailer_lift_by_category`,
-   `display_lift_by_category`, `lift_sensitivity`, `promo_timing`, `segment_profile`, `segment_redemption`,
-   `capture_curve`, `dq_check_status`, `dq_latest_checks`, `dq_rule_counts`, `pipeline_runs`.
-4. Choose the SQL warehouse (Free Edition has one).
+3. **Data** tab → *Add SQL dataset*, **one dataset per view** (13 in total). Each dataset's query is a
+   single line, and its name (⋮ → *Rename*) is the view name:
+
+   | Dataset name | Query |
+   |---|---|
+   | `kpi_headline` | `SELECT * FROM retail.dashboard.kpi_headline` |
+   | `weekly_kpis` | `SELECT * FROM retail.dashboard.weekly_kpis` |
+   | `mailer_lift_by_category` | `SELECT * FROM retail.dashboard.mailer_lift_by_category` |
+   | `display_lift_by_category` | `SELECT * FROM retail.dashboard.display_lift_by_category` |
+   | `lift_sensitivity` | `SELECT * FROM retail.dashboard.lift_sensitivity` |
+   | `promo_timing` | `SELECT * FROM retail.dashboard.promo_timing` |
+   | `segment_profile` | `SELECT * FROM retail.dashboard.segment_profile` |
+   | `segment_redemption` | `SELECT * FROM retail.dashboard.segment_redemption` |
+   | `capture_curve` | `SELECT * FROM retail.dashboard.capture_curve` |
+   | `dq_check_status` | `SELECT * FROM retail.dashboard.dq_check_status` |
+   | `dq_latest_checks` | `SELECT * FROM retail.dashboard.dq_latest_checks` |
+   | `dq_rule_counts` | `SELECT * FROM retail.dashboard.dq_rule_counts` |
+   | `pipeline_runs` | `SELECT * FROM retail.dashboard.pipeline_runs` |
+
+   The catalog and schema boxes next to *Run* can stay on their defaults, because each query names the
+   full path.
+4. The SQL warehouse is the box at the top right next to *Publish* (on Free Edition, *Serverless Starter
+   Warehouse*); it is selected by default.
 
 **Colours** (project palette): blue `#2a78d6` for the main series, orange `#eb6834` for a second
 series, aqua `#1baf7a` for a third, grey `#a3a29c` for reference series (random targeting, ramp-up weeks).
@@ -27,13 +45,17 @@ Format share columns as percentages.
 | Households | kpi_headline | Counter | `households` |
 | Average basket | kpi_headline | Counter | `avg_basket_spend`, currency |
 | Promotion share of sales | kpi_headline | Counter | `promo_share_of_sales`, percent |
-| Sales per active household by week | weekly_kpis | Line | x `week_no`, y `sales_per_household`, colour by `period` (ramp-up grey, full panel blue) |
-| Active households by week | weekly_kpis | Line | x `week_no`, y `active_households` |
+| Sales per active household by week | weekly_kpis | Line | x `week_no`, y `sales_per_household`, colour by `period` (ramp-up grey, full panel blue); widget filter `full_week = true` |
+| Active households by week | weekly_kpis | Line | x `week_no`, y `active_households`; widget filter `full_week = true` |
 | Promotion share of sales by week | weekly_kpis | Line | x `week_no`, y `promo_share_of_sales` |
 
+Axis titles: "Week", "Sales per active household ($)", "Active households", "Promotion share of sales"
+(the defaults are raw column names).
+
 Text box: *"Weeks 1–13 are the panel ramp-up: households were still joining (88 active in week 1, over
-1,000 from week 14), so use sales per active household for trends. Promotion share is recorded only
-for weeks 9–101 in the 115 stores with promotion data."*
+1,000 from week 14), so use sales per active household for trends. Weeks 1 and 102 cover only 5 and 6
+days, so the trend charts leave out these partial weeks. Promotion share is recorded only for weeks
+9–101 in the 115 stores with promotion data."*
 
 ## Page 2 · Promotion levers
 

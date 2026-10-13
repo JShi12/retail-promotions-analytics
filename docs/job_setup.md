@@ -25,6 +25,6 @@ The job runs the whole project on serverless compute. Its intended definition is
 4. **Schedule** (job details → *Add trigger → Scheduled*): weekly, Monday 06:00, Europe/London.
 5. **Check against the repo:** ⋮ next to *Run now* → *Switch to code version (YAML)* and compare with
    `jobs/retail_pipeline.yml` (task names, dependencies, parameters, schedule).
-6. **Run once:** *Run now*, at a quiet time. Note the total duration from the run page.
+6. **Run once:** *Run now*, at a quiet time. The first full run took 46 minutes.
 7. **Pause** the schedule after the run succeeds (job details → schedule → *Pause*). The data is
    static, so the schedule demonstrates the setup; pausing protects the Free Edition daily quota.

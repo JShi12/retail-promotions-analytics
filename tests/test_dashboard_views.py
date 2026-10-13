@@ -121,6 +121,8 @@ def test_overview_lift_and_dq_views(spark, catalog):
     )  # only weeks where it is recorded
     weekly = {r["week_no"]: r for r in spark.table("dtest_dash.weekly_kpis").collect()}
     assert weekly[1]["period"].startswith("Panel ramp-up") and weekly[20]["period"] == "Full panel"
+    assert weekly[1]["days_in_week"] == 5 and not weekly[1]["full_week"]  # days 1-5
+    assert weekly[20]["days_in_week"] == 7 and weekly[20]["full_week"]
 
     mailer = {
         r["category"]: r["lift"]

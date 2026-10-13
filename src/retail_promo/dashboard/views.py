@@ -8,6 +8,8 @@ from __future__ import annotations
 
 from pyspark.sql import SparkSession
 
+from retail_promo.config import LAST_DAY
+
 SHARES = "0.05, 0.10, 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00"
 
 VIEWS: dict[str, str] = {
@@ -22,9 +24,14 @@ VIEWS: dict[str, str] = {
           SUM(loyalty_discount) AS loyalty_discount,
           COUNT(*) AS weeks
         FROM {gold}.weekly_kpis""",
+    # Days in a week follow from week_no = floor((day + 1) / 7) + 1 over days 1..LAST_DAY: week w
+    # covers days 7w-8 .. 7w-2, so week 1 has 5 days and week 102 has 6. Partial weeks are flagged
+    # so trend charts can leave them out.
     "weekly_kpis": """
         SELECT week_no, sales, sales_per_household, active_households, baskets, avg_basket_spend,
                promo_share_of_sales, ramp_up,
+               LEAST({last_day}, 7 * week_no - 2) - GREATEST(1, 7 * week_no - 8) + 1 AS days_in_week,
+               LEAST({last_day}, 7 * week_no - 2) - GREATEST(1, 7 * week_no - 8) + 1 = 7 AS full_week,
                CASE WHEN ramp_up THEN 'Panel ramp-up (weeks 1-13)' ELSE 'Full panel' END AS period
         FROM {gold}.weekly_kpis""",
     # ---------------------------------------------------------------- promotion levers
@@ -118,7 +125,7 @@ VIEWS: dict[str, str] = {
 
 
 def render(name: str, gold: str, ops: str) -> str:
-    return VIEWS[name].format(gold=gold, ops=ops)
+    return VIEWS[name].format(gold=gold, ops=ops, last_day=LAST_DAY)
 
 
 def create_views(spark: SparkSession, gold: str, ops: str, dashboard: str) -> list[str]:
