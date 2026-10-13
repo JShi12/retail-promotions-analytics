@@ -5,7 +5,7 @@ next coupon campaign: an end-to-end analysis for a grocery retailer's pricing an
 built on Databricks (PySpark, Delta Lake, Unity Catalog) with dunnhumby's *The Complete Journey*
 (2,500 households, two years, 2.6M purchase lines).
 
-**Read the findings:** [REPORT.md](REPORT.md) (for a pricing and promotions manager).
+**Read the findings:** [REPORT.md](REPORT.md).
 
 ## What we found
 
