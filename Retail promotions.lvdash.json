@@ -1,0 +1,2232 @@
+{
+  "datasets": [
+    {
+      "name": "ec049f06",
+      "displayName": "kpi_headline",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.kpi_headline"
+      ]
+    },
+    {
+      "name": "a9c7d73a",
+      "displayName": "weekly_kpis",
+      "queryLines": [
+        "\tSELECT * FROM retail.dashboard.weekly_kpis"
+      ]
+    },
+    {
+      "name": "dde58518",
+      "displayName": "mailer_lift_by_category",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.mailer_lift_by_category"
+      ]
+    },
+    {
+      "name": "dafe708a",
+      "displayName": "display_lift_by_category",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.display_lift_by_category"
+      ]
+    },
+    {
+      "name": "1861b9c7",
+      "displayName": "lift_sensitivity",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.lift_sensitivity"
+      ]
+    },
+    {
+      "name": "4c0bfd2a",
+      "displayName": "promo_timing",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.promo_timing"
+      ]
+    },
+    {
+      "name": "58e47406",
+      "displayName": "segment_profile",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.segment_profile"
+      ]
+    },
+    {
+      "name": "c960ee45",
+      "displayName": "segment_redemption",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.segment_redemption"
+      ]
+    },
+    {
+      "name": "de4b89c7",
+      "displayName": "capture_curve",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.capture_curve"
+      ]
+    },
+    {
+      "name": "608ef025",
+      "displayName": "dq_check_status",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.dq_check_status"
+      ]
+    },
+    {
+      "name": "7aa2f1f9",
+      "displayName": "dq_latest_checks",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.dq_latest_checks"
+      ]
+    },
+    {
+      "name": "134db8ea",
+      "displayName": "dq_rule_counts",
+      "queryLines": [
+        "\tSELECT * FROM retail.dashboard.dq_rule_counts"
+      ]
+    },
+    {
+      "name": "7dd641e7",
+      "displayName": "pipeline_runs",
+      "queryLines": [
+        "SELECT * FROM retail.dashboard.pipeline_runs"
+      ]
+    }
+  ],
+  "pages": [
+    {
+      "name": "13b1a394",
+      "displayName": "Overview",
+      "layout": [
+        {
+          "widget": {
+            "name": "counter_total_sales",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ec049f06",
+                  "fields": [
+                    {
+                      "name": "sum(total_sales)",
+                      "expression": "SUM(`total_sales`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Total sales",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(total_sales)",
+                  "rowNumber": 0,
+                  "format": {
+                    "type": "number-currency",
+                    "abbreviation": "none",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_households",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ec049f06",
+                  "fields": [
+                    {
+                      "name": "sum(households)",
+                      "expression": "SUM(`households`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Households",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(households)",
+                  "rowNumber": 0,
+                  "format": {
+                    "type": "number-plain",
+                    "abbreviation": "none",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 3,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_avg_basket",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ec049f06",
+                  "fields": [
+                    {
+                      "name": "sum(avg_basket_spend)",
+                      "expression": "SUM(`avg_basket_spend`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Average basket",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(avg_basket_spend)",
+                  "rowNumber": 0,
+                  "format": {
+                    "type": "number-currency",
+                    "abbreviation": "none",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 2
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_promo_share",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "ec049f06",
+                  "fields": [
+                    {
+                      "name": "sum(promo_share_of_sales)",
+                      "expression": "SUM(`promo_share_of_sales`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Promotion share of sales",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(promo_share_of_sales)",
+                  "rowNumber": 0,
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 9,
+            "y": 0,
+            "width": 3,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "line_sales_per_hh",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a9c7d73a",
+                  "fields": [
+                    {
+                      "name": "period",
+                      "expression": "`period`"
+                    },
+                    {
+                      "name": "week_no",
+                      "expression": "`week_no`"
+                    },
+                    {
+                      "name": "sum(sales_per_household)",
+                      "expression": "SUM(`sales_per_household`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`full_week` = true"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Sales per active household by week",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "week_no",
+                  "axis": {
+                    "title": "Week"
+                  },
+                  "displayName": "week_no",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(sales_per_household)",
+                  "format": {
+                    "type": "number-currency",
+                    "abbreviation": "none",
+                    "currencyCode": "USD",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 0
+                    }
+                  },
+                  "axis": {
+                    "title": "Sales per active household ($)"
+                  },
+                  "displayName": "sales_per_household",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "fieldName": "period",
+                  "displayName": "period",
+                  "scale": {
+                    "type": "categorical",
+                    "mappings": [
+                      {
+                        "value": "Panel ramp-up (weeks 1-13)",
+                        "color": "#a3a29c"
+                      },
+                      {
+                        "value": "Full panel",
+                        "color": "#2a78d6"
+                      }
+                    ]
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 2,
+            "width": 12,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "line_active_hh",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a9c7d73a",
+                  "fields": [
+                    {
+                      "name": "week_no",
+                      "expression": "`week_no`"
+                    },
+                    {
+                      "name": "sum(active_households)",
+                      "expression": "SUM(`active_households`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`full_week` = true"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Active households by week",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#2a78d6"
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "week_no",
+                  "axis": {
+                    "title": "Week"
+                  },
+                  "displayName": "week_no",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(active_households)",
+                  "axis": {
+                    "title": "Active households"
+                  },
+                  "displayName": "active_households",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "line_promo_share",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "a9c7d73a",
+                  "fields": [
+                    {
+                      "name": "week_no",
+                      "expression": "`week_no`"
+                    },
+                    {
+                      "name": "sum(promo_share_of_sales)",
+                      "expression": "SUM(`promo_share_of_sales`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Promotion share of sales by week",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#2a78d6"
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "week_no",
+                  "axis": {
+                    "title": "Week"
+                  },
+                  "displayName": "week_no",
+                  "scale": {
+                    "type": "categorical"
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(promo_share_of_sales)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  },
+                  "axis": {
+                    "title": "Promotion share of sales"
+                  },
+                  "displayName": "promo_share_of_sales",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 6,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "02996023",
+            "multilineTextboxSpec": {
+              "lines": [
+                "Weeks 1–13 are the panel ramp-up: households were still joining (88 active in week 1, over 1,000 from week 14), so use sales per active household for trends. Weeks 1 and 102 cover only 5 and 6 days, so the trend charts leave out these partial weeks. Promotion share is recorded only for weeks 9–101 in the 115 stores with promotion data."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 11,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "87b961b2",
+      "displayName": "Promotion levers",
+      "layout": [
+        {
+          "widget": {
+            "name": "bar_promo_timing",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "4c0bfd2a",
+                  "fields": [
+                    {
+                      "name": "week",
+                      "expression": "`week`"
+                    },
+                    {
+                      "name": "sum(lift)",
+                      "expression": "SUM(`lift`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Sales around a mailer week",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#2a78d6"
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "week",
+                  "displayName": "week",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "Week before the mailer",
+                        "Mailer week",
+                        "Week after the mailer"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(lift)",
+                  "format": {
+                    "type": "number-percent",
+                    "decimalPlaces": {
+                      "type": "exact",
+                      "places": 1
+                    }
+                  },
+                  "displayName": "lift",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 7,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "table_mailer_lift",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dde58518",
+                  "fields": [
+                    {
+                      "name": "category",
+                      "expression": "`category`"
+                    },
+                    {
+                      "name": "lift",
+                      "expression": "`lift`"
+                    },
+                    {
+                      "name": "lift_low",
+                      "expression": "`lift_low`"
+                    },
+                    {
+                      "name": "lift_high",
+                      "expression": "`lift_high`"
+                    },
+                    {
+                      "name": "product_weeks",
+                      "expression": "`product_weeks`"
+                    }
+                  ],
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "`lift`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Mailer-week lift with 95% confidence interval",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "category"
+                  },
+                  {
+                    "fieldName": "lift",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "lift_low",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "lift_high",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "product_weeks"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column-reversed",
+                    "field": {
+                      "index": 1
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 4,
+            "y": 7,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "table_sensitivity",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "1861b9c7",
+                  "fields": [
+                    {
+                      "name": "variant",
+                      "expression": "`variant`"
+                    },
+                    {
+                      "name": "term",
+                      "expression": "`term`"
+                    },
+                    {
+                      "name": "lift",
+                      "expression": "`lift`"
+                    },
+                    {
+                      "name": "lift_low",
+                      "expression": "`lift_low`"
+                    },
+                    {
+                      "name": "lift_high",
+                      "expression": "`lift_high`"
+                    },
+                    {
+                      "name": "n_obs",
+                      "expression": "`n_obs`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Sensitivity of the pooled estimates",
+                  "fields": []
+                }
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "variant"
+                  },
+                  {
+                    "fieldName": "term"
+                  },
+                  {
+                    "fieldName": "lift",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "lift_low",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "lift_high",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    }
+                  },
+                  {
+                    "fieldName": "n_obs"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 8,
+            "y": 7,
+            "width": 4,
+            "height": 5
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_mailer_lift",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dde58518",
+                  "fields": [
+                    {
+                      "name": "category",
+                      "expression": "`category`"
+                    },
+                    {
+                      "name": "sum(lift)",
+                      "expression": "SUM(`lift`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Mailer-week lift by category"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(lift)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "displayName": "lift",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "category",
+                  "displayName": "category",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "category",
+                  "legend": {
+                    "hide": true
+                  },
+                  "scale": {
+                    "mappings": [
+                      {
+                        "color": "#a3a29c",
+                        "value": "ALL PRODUCTS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "SOFT DRINKS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "BEEF"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "FLUID MILK PRODUCTS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "CHEESE"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "FRZN MEAT/MEAT DINNERS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "BAKED BREAD/BUNS/ROLLS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "FROZEN PIZZA"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "BAG SNACKS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "BEERS/ALES"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "COLD CEREAL"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "DELI MEATS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "LUNCHMEAT"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "CHICKEN"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "SOUP"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "REFRGRATD JUICES/DRNKS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "PORK"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "ICE CREAM/MILK/SHERBTS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "CANNED JUICES"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "MEAT - MISC"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "YOGURT"
+                      }
+                    ],
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_display_lift",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "dafe708a",
+                  "fields": [
+                    {
+                      "name": "category",
+                      "expression": "`category`"
+                    },
+                    {
+                      "name": "sum(lift)",
+                      "expression": "SUM(`lift`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "In-store display lift by category"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(lift)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "displayName": "lift",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "category",
+                  "displayName": "category",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "category",
+                  "legend": {
+                    "hide": true
+                  },
+                  "scale": {
+                    "mappings": [
+                      {
+                        "color": "#a3a29c",
+                        "value": "ALL PRODUCTS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "SOFT DRINKS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "FLUID MILK PRODUCTS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "CHEESE"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "FRZN MEAT/MEAT DINNERS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "BAKED BREAD/BUNS/ROLLS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "FROZEN PIZZA"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "BAG SNACKS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "BEERS/ALES"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "COLD CEREAL"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "LUNCHMEAT"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "SOUP"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "REFRGRATD JUICES/DRNKS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "ICE CREAM/MILK/SHERBTS"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "CANNED JUICES"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "MEAT - MISC"
+                      },
+                      {
+                        "color": "#2a78d6",
+                        "value": "YOGURT"
+                      }
+                    ],
+                    "type": "categorical"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 7
+          }
+        },
+        {
+          "widget": {
+            "name": "0511b4e8",
+            "multilineTextboxSpec": {
+              "lines": [
+                "Associations, not causal effects: the retailer chooses what to promote. Mailer-week lift includes the price cut that usually comes with a mailer feature. Display lift is approximate, for the stores that have the display. Source: notebook 10.\n",
+                "<p>&nbsp;</p>\n"
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 15,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "ef4950fd",
+      "displayName": "Customer segments",
+      "layout": [
+        {
+          "widget": {
+            "name": "bar_share",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "58e47406",
+                  "fields": [
+                    {
+                      "name": "segment_label",
+                      "expression": "`segment_label`"
+                    },
+                    {
+                      "name": "sum(share_of_households)",
+                      "expression": "SUM(`share_of_households`)"
+                    },
+                    {
+                      "name": "sum(share_of_spend)",
+                      "expression": "SUM(`share_of_spend`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Share of households and of spend",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#2a78d6",
+                  "#eb6834"
+                ],
+                "layout": "group"
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "segment_label",
+                  "displayName": "Segment",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "More promotion, more coupons",
+                        "More promotion, more own label",
+                        "Less promotion, less own label"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "sum(share_of_households)",
+                      "displayName": "Share of households"
+                    },
+                    {
+                      "fieldName": "sum(share_of_spend)",
+                      "displayName": "Share of spend"
+                    }
+                  ],
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "scale": {
+                    "type": "quantitative"
+                  },
+                  "axis": {
+                    "title": "Share"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "bar_redemption",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "c960ee45",
+                  "fields": [
+                    {
+                      "name": "sum(campaign_pairs)",
+                      "expression": "SUM(`campaign_pairs`)"
+                    },
+                    {
+                      "name": "segment_label",
+                      "expression": "`segment_label`"
+                    },
+                    {
+                      "name": "sum(redemption_rate)",
+                      "expression": "SUM(`redemption_rate`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": {
+                  "value": "Campaign coupon redemption rate",
+                  "fields": []
+                }
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#2a78d6"
+                ]
+              },
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "segment_label",
+                  "displayName": "Segment",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "custom-order",
+                      "orderedValues": [
+                        "More promotion, more coupons",
+                        "More promotion, more own label",
+                        "Less promotion, less own label"
+                      ]
+                    }
+                  }
+                },
+                "y": {
+                  "fieldName": "sum(redemption_rate)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "axis": {
+                    "title": "Redemption rate"
+                  },
+                  "displayName": "redemption_rate",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "sum(campaign_pairs)",
+                    "displayName": "Campaign pairs"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "table_actual_expected",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "58e47406",
+                  "fields": [
+                    {
+                      "name": "segment_label",
+                      "expression": "`segment_label`"
+                    },
+                    {
+                      "name": "promo_actual",
+                      "expression": "`promo_actual`"
+                    },
+                    {
+                      "name": "promo_expected",
+                      "expression": "`promo_expected`"
+                    },
+                    {
+                      "name": "disc_actual",
+                      "expression": "`disc_actual`"
+                    },
+                    {
+                      "name": "disc_expected",
+                      "expression": "`disc_expected`"
+                    },
+                    {
+                      "name": "pl_actual",
+                      "expression": "`pl_actual`"
+                    },
+                    {
+                      "name": "pl_expected",
+                      "expression": "`pl_expected`"
+                    }
+                  ],
+                  "disaggregated": true
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Actual vs expected behaviour (median household)"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "segment_label",
+                    "displayName": "Segment"
+                  },
+                  {
+                    "fieldName": "promo_actual",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    },
+                    "displayName": "Promotion share (actual)"
+                  },
+                  {
+                    "fieldName": "promo_expected",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    },
+                    "displayName": "Promotion share (expected)"
+                  },
+                  {
+                    "fieldName": "disc_actual",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    },
+                    "displayName": "Discount off shelf price (actual)"
+                  },
+                  {
+                    "fieldName": "disc_expected",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    },
+                    "displayName": "Discount off shelf price (expected)"
+                  },
+                  {
+                    "fieldName": "pl_actual",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    },
+                    "displayName": "Own label (actual)"
+                  },
+                  {
+                    "fieldName": "pl_expected",
+                    "format": {
+                      "decimalPlaces": {
+                        "places": 1,
+                        "type": "exact"
+                      },
+                      "type": "number-percent"
+                    },
+                    "displayName": "Own label (expected)"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 6,
+            "width": 12,
+            "height": 3
+          }
+        },
+        {
+          "widget": {
+            "name": "573d673c",
+            "multilineTextboxSpec": {
+              "lines": [
+                "Segments describe price-and-promotion behaviour, measured against shoppers buying the same categories in the same stores. \"Expected\" is what those shoppers show; the gap is the segment's own behaviour. Demographics are not shown: they cover only 801 heavier-shopping households. Source: notebook 20."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 9,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "1782fa21",
+      "displayName": "How well the model would have targeted past campaigns",
+      "layout": [
+        {
+          "widget": {
+            "name": "counter_model_20pct",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "de4b89c7",
+                  "fields": [
+                    {
+                      "name": "sum(model)",
+                      "expression": "SUM(`model`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`share_targeted` = 0.2"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Redemptions captured by targeting the top 20% (model)"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(model)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "counter_rule_20pct",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "de4b89c7",
+                  "fields": [
+                    {
+                      "name": "sum(rule_coupon_share)",
+                      "expression": "SUM(`rule_coupon_share`)"
+                    }
+                  ],
+                  "filters": [
+                    {
+                      "expression": "`share_targeted` = 0.2"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Same, using past coupon use"
+              },
+              "version": 2,
+              "widgetType": "counter",
+              "encodings": {
+                "value": {
+                  "fieldName": "sum(rule_coupon_share)",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 8,
+            "width": 6,
+            "height": 2
+          }
+        },
+        {
+          "widget": {
+            "name": "line_capture_curve",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "de4b89c7",
+                  "fields": [
+                    {
+                      "name": "share_targeted",
+                      "expression": "`share_targeted`"
+                    },
+                    {
+                      "name": "sum(model)",
+                      "expression": "SUM(`model`)"
+                    },
+                    {
+                      "name": "sum(rule_coupon_share)",
+                      "expression": "SUM(`rule_coupon_share`)"
+                    },
+                    {
+                      "name": "sum(random)",
+                      "expression": "SUM(`random`)"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Share of redemptions captured"
+              },
+              "version": 3,
+              "mark": {
+                "colors": [
+                  "#2a78d6",
+                  "#eb6834",
+                  "#a3a29c"
+                ]
+              },
+              "widgetType": "line",
+              "encodings": {
+                "x": {
+                  "fieldName": "share_targeted",
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "displayName": "Share targeted",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fields": [
+                    {
+                      "fieldName": "sum(model)",
+                      "displayName": "Model (gradient-boosted trees)"
+                    },
+                    {
+                      "fieldName": "sum(rule_coupon_share)",
+                      "displayName": "Rule: past coupon use"
+                    },
+                    {
+                      "fieldName": "sum(random)",
+                      "displayName": "Random"
+                    }
+                  ],
+                  "format": {
+                    "decimalPlaces": {
+                      "places": 1,
+                      "type": "exact"
+                    },
+                    "type": "number-percent"
+                  },
+                  "scale": {
+                    "domain": {
+                      "max": 1,
+                      "min": 0
+                    },
+                    "type": "quantitative"
+                  }
+                },
+                "color": {
+                  "legend": {
+                    "hide": false
+                  }
+                }
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 12,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "1ede64ce",
+            "multilineTextboxSpec": {
+              "lines": [
+                "A back-test: each past campaign sent to its top X% of eligible households by out-of-fold score (scores from models that never saw that household). It predicts redemption, not extra sales: heavy coupon users may have bought anyway. Targeting a future campaign needs a scoring job (future work). Source: notebook 30."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 10,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    },
+    {
+      "name": "07ad2796",
+      "displayName": "Data quality",
+      "layout": [
+        {
+          "widget": {
+            "name": "bar_rule_counts",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "134db8ea",
+                  "fields": [
+                    {
+                      "name": "action",
+                      "expression": "`action`"
+                    },
+                    {
+                      "name": "table_name",
+                      "expression": "`table_name`"
+                    },
+                    {
+                      "name": "sum(n_rows)",
+                      "expression": "SUM(`n_rows`)"
+                    },
+                    {
+                      "name": "rule_id",
+                      "expression": "`rule_id`"
+                    }
+                  ],
+                  "disaggregated": false
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Rows flagged, modified or dropped"
+              },
+              "version": 3,
+              "widgetType": "bar",
+              "encodings": {
+                "x": {
+                  "fieldName": "sum(n_rows)",
+                  "format": {
+                    "abbreviation": "none",
+                    "type": "number-plain"
+                  },
+                  "displayName": "n_rows",
+                  "scale": {
+                    "type": "quantitative"
+                  }
+                },
+                "y": {
+                  "fieldName": "rule_id",
+                  "displayName": "rule_id",
+                  "scale": {
+                    "type": "categorical",
+                    "sort": {
+                      "by": "x-reversed"
+                    }
+                  }
+                },
+                "color": {
+                  "fieldName": "action",
+                  "legend": {
+                    "hide": false
+                  },
+                  "scale": {
+                    "mappings": [
+                      {
+                        "color": "#2a78d6",
+                        "value": "flagged"
+                      },
+                      {
+                        "color": "#eb6834",
+                        "value": "modified"
+                      },
+                      {
+                        "color": "#1baf7a",
+                        "value": "dropped"
+                      }
+                    ],
+                    "type": "categorical"
+                  }
+                },
+                "extra": [
+                  {
+                    "fieldName": "table_name",
+                    "displayName": "Table"
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 6,
+            "y": 0,
+            "width": 6,
+            "height": 8
+          }
+        },
+        {
+          "widget": {
+            "name": "table_pipeline_runs",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7dd641e7",
+                  "fields": [
+                    {
+                      "name": "run_id",
+                      "expression": "`run_id`"
+                    },
+                    {
+                      "name": "status",
+                      "expression": "`status`"
+                    },
+                    {
+                      "name": "finished_at",
+                      "expression": "`finished_at`"
+                    },
+                    {
+                      "name": "detail",
+                      "expression": "`detail`"
+                    }
+                  ],
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "DESC",
+                      "expression": "`finished_at`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Pipeline runs"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "run_id"
+                  },
+                  {
+                    "fieldName": "status"
+                  },
+                  {
+                    "fieldName": "finished_at",
+                    "format": {
+                      "date": "locale-short-month",
+                      "time": "locale-hour-minute",
+                      "type": "date-time"
+                    },
+                    "displayName": "Finished at"
+                  },
+                  {
+                    "fieldName": "detail"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column-reversed",
+                    "field": {
+                      "index": 2
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 4,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "table_check_details",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "7aa2f1f9",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "table_name",
+                      "expression": "`table_name`"
+                    },
+                    {
+                      "name": "check_id",
+                      "expression": "`check_id`"
+                    },
+                    {
+                      "name": "severity",
+                      "expression": "`severity`"
+                    },
+                    {
+                      "name": "passed",
+                      "expression": "`passed`"
+                    },
+                    {
+                      "name": "observed",
+                      "expression": "`observed`"
+                    },
+                    {
+                      "name": "expected",
+                      "expression": "`expected`"
+                    }
+                  ],
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`passed`"
+                    },
+                    {
+                      "direction": "ASC",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "direction": "ASC",
+                      "expression": "`table_name`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Check details, latest run"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "layer"
+                  },
+                  {
+                    "fieldName": "table_name"
+                  },
+                  {
+                    "fieldName": "check_id"
+                  },
+                  {
+                    "fieldName": "severity"
+                  },
+                  {
+                    "fieldName": "passed"
+                  },
+                  {
+                    "fieldName": "observed"
+                  },
+                  {
+                    "fieldName": "expected"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 4
+                    }
+                  },
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 0
+                    }
+                  },
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 1
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 8,
+            "width": 12,
+            "height": 6
+          }
+        },
+        {
+          "widget": {
+            "name": "table_check_status",
+            "queries": [
+              {
+                "name": "main_query",
+                "query": {
+                  "datasetName": "608ef025",
+                  "fields": [
+                    {
+                      "name": "layer",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "name": "severity",
+                      "expression": "`severity`"
+                    },
+                    {
+                      "name": "passed",
+                      "expression": "`passed`"
+                    },
+                    {
+                      "name": "failed",
+                      "expression": "`failed`"
+                    }
+                  ],
+                  "disaggregated": true,
+                  "orders": [
+                    {
+                      "direction": "ASC",
+                      "expression": "`layer`"
+                    },
+                    {
+                      "direction": "ASC",
+                      "expression": "`severity`"
+                    }
+                  ]
+                }
+              }
+            ],
+            "spec": {
+              "frame": {
+                "showTitle": true,
+                "title": "Checks passed and failed, latest run"
+              },
+              "version": 2,
+              "widgetType": "table",
+              "encodings": {
+                "columns": [
+                  {
+                    "fieldName": "layer"
+                  },
+                  {
+                    "fieldName": "severity"
+                  },
+                  {
+                    "fieldName": "passed"
+                  },
+                  {
+                    "fieldName": "failed"
+                  }
+                ],
+                "rowOrder": [
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 0
+                    }
+                  },
+                  {
+                    "by": "column",
+                    "field": {
+                      "index": 1
+                    }
+                  }
+                ]
+              },
+              "data": {
+                "queryName": "main_query"
+              }
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 0,
+            "width": 6,
+            "height": 4
+          }
+        },
+        {
+          "widget": {
+            "name": "da18e6a1",
+            "multilineTextboxSpec": {
+              "lines": [
+                "Silver keeps problem rows and flags them; only exact duplicate rows are dropped. \"Modified\" means a value was changed, for example a blank set to empty or two conflicting promotion records merged, and every change is logged with its reason. \"Error\" checks stop a run; \"warning\" checks are recorded only."
+              ]
+            }
+          },
+          "position": {
+            "x": 0,
+            "y": 14,
+            "width": 12,
+            "height": 2
+          }
+        }
+      ],
+      "pageType": "PAGE_TYPE_CANVAS",
+      "layoutVersion": "GRID_V1"
+    }
+  ],
+  "uiSettings": {
+    "theme": {
+      "widgetHeaderAlignment": "ALIGNMENT_UNSPECIFIED"
+    },
+    "applyModeEnabled": false
+  }
+}
