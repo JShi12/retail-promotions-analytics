@@ -28,6 +28,9 @@ DISPLAY_CODES = frozenset({"0", "1", "2", "3", "4", "5", "6", "7", "9", "A"})
 MAILER_CODES = frozenset({"0", "A", "C", "D", "F", "H", "J", "L", "P", "X", "Z"})
 
 LAST_DAY = 711  # last transaction day in the data
+# Weeks 1-13: the household panel is still filling (88 active households in week 1, first week
+# with 1,000+ is week 14), so raw weekly totals rise for reasons unrelated to demand.
+RAMP_UP_LAST_WEEK = 13
 
 
 @dataclass(frozen=True)

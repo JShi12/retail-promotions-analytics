@@ -154,3 +154,25 @@ def test_product_week_panel(silver):
     # Week 12: only store 1 has lines, so store 2 (product 11 display) carries no traffic weight.
     assert rows[(11, 12)]["display_share"] == pytest.approx(0.0)
     assert rows[(11, 12)]["n_stores_display"] == 1
+
+
+def test_weekly_kpis(silver):
+    wk = {r["week_no"]: r for r in gold.weekly_kpis(silver["txn"]).collect()}
+    w11 = wk[11]  # hh1 basket 101 (product 10 on display, 3.00; fuel 90.00) + hh2 basket 200 (4.00)
+    assert w11["sales"] == pytest.approx(97.0)  # all lines, fuel included
+    assert w11["units"] == 3  # merchandise only
+    assert w11["baskets"] == 2 and w11["active_households"] == 2
+    assert w11["sales_per_household"] == pytest.approx(48.5)
+    assert w11["loyalty_discount"] == pytest.approx(1.0)
+    assert w11["promo_share_of_sales"] == pytest.approx(3 / 7)  # merchandise, observed lines only
+    assert wk[14]["promo_share_of_sales"] == pytest.approx(0.0)  # day 90 is week 14
+    assert wk[9]["ramp_up"] and not wk[14]["ramp_up"]
+
+
+def test_weekly_kpis_promo_share_is_null_where_not_recorded(spark):
+    cols = "week_no int, basket_id long, household_key int, quantity int, sales_value double, "
+    cols += "retail_disc double, is_non_merchandise boolean, promo_observed boolean, "
+    cols += "on_display boolean, on_mailer boolean"
+    df = spark.createDataFrame([(3, 1, 1, 1, 2.0, 0.0, False, False, None, None)], cols)
+    row = gold.weekly_kpis(df).first()
+    assert row["promo_share_of_sales"] is None and row["ramp_up"]

@@ -129,7 +129,9 @@ def run(spark: SparkSession, io: TableIO, n_boot: int = 20) -> Phase3Results:
 
 def write_gold(spark: SparkSession, io: TableIO, res: Phase3Results, run_id: str) -> None:
     cols = ["household_key", "segment", "segment_label", "segment_name", "deal_index", "pl_adjusted", "log_coupon",
-            "promo_adjusted", "disc_adjusted", "low_activity", "promo_imputed"]  # fmt: skip
+            "promo_adjusted", "disc_adjusted", "low_activity", "promo_imputed",
+            # actual vs expected, for the dashboard's segment page
+            "promo_actual", "promo_expected", "disc_actual", "disc_expected", "pl_actual", "pl_expected"]  # fmt: skip
     out = res.assigned[cols].copy()
     out["run_id"] = run_id
     io.write(spark.createDataFrame(out), "gold", "household_segments")

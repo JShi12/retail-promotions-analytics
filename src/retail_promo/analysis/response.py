@@ -138,7 +138,7 @@ def capture(df: pd.DataFrame, score: str, share: float) -> float:
     households by score (top-k per campaign, k = ceil(share * campaign size))."""
     captured = 0
     for _, g in df.groupby("campaign"):
-        k = math.ceil(share * len(g))
+        k = math.ceil(round(share * len(g), 9))  # rounding guards against float error
         captured += g.sort_values(score, ascending=False, kind="stable").head(k)[LABEL].sum()
     return captured / df[LABEL].sum()
 
@@ -147,7 +147,7 @@ def within_campaign_lift(df: pd.DataFrame, score: str, share: float = 0.10) -> f
     """Redemption rate among each campaign's top `share` by score ÷ the overall rate."""
     top_n = top_pos = 0
     for _, g in df.groupby("campaign"):
-        k = math.ceil(share * len(g))
+        k = math.ceil(round(share * len(g), 9))  # rounding guards against float error
         top_n += k
         top_pos += g.sort_values(score, ascending=False, kind="stable").head(k)[LABEL].sum()
     return (top_pos / top_n) / df[LABEL].mean()

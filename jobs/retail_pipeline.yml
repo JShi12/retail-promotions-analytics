@@ -1,0 +1,49 @@
+# Databricks job for the whole project, in the format the job UI shows under
+# "Switch to code version (YAML)". It is created by hand in the UI (docs/job_setup.md) and this
+# file records the intended definition. Replace <git-folder> with the Git folder's workspace path,
+# e.g. /Workspace/Users/<you>/retail-promotions-analytics.
+#
+# Compute: serverless (no cluster defined). The data is static, so the weekly schedule demonstrates
+# the setup and is paused after one successful run to protect the Free Edition daily quota.
+resources:
+  jobs:
+    retail_promotions_pipeline:
+      name: retail-promotions-pipeline
+      max_concurrent_runs: 1
+      parameters:
+        - name: catalog
+          default: retail
+        - name: run_id            # one id for the whole run, read by every notebook's widget
+          default: "{{job.run_id}}"
+      schedule:
+        quartz_cron_expression: "0 0 6 ? * MON"   # Mondays 06:00
+        timezone_id: Europe/London
+        pause_status: PAUSED
+      tasks:
+        - task_key: setup
+          notebook_task: {notebook_path: <git-folder>/notebooks/00_setup}
+        - task_key: bronze
+          depends_on: [{task_key: setup}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/01_bronze}
+        - task_key: silver
+          depends_on: [{task_key: bronze}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/02_silver}
+        - task_key: gold
+          depends_on: [{task_key: silver}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/03_gold}
+        # After gold, five tasks run in parallel: the Free Edition limit of 5 concurrent tasks.
+        - task_key: dq_report
+          depends_on: [{task_key: gold}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/04_dq_report}
+        - task_key: promo_effectiveness
+          depends_on: [{task_key: gold}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/10_promo_effectiveness}
+        - task_key: customer_segments
+          depends_on: [{task_key: gold}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/20_customer_segments}
+        - task_key: coupon_response
+          depends_on: [{task_key: gold}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/30_coupon_response}
+        - task_key: dashboard_views
+          depends_on: [{task_key: customer_segments}, {task_key: promo_effectiveness}, {task_key: coupon_response}]
+          notebook_task: {notebook_path: <git-folder>/notebooks/40_dashboard_views}

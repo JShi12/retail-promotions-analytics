@@ -6,7 +6,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
-from retail_promo.config import LAST_DAY
+from retail_promo.config import LAST_DAY, RAMP_UP_LAST_WEEK
 from retail_promo.gold.features import aggregate_features, lines_with_products
 
 DEMOGRAPHIC_COLUMNS = [
@@ -223,6 +223,42 @@ def product_week_panel(
     ]:  # fmt: skip
         panel = panel.withColumn(col, F.coalesce(F.col(col), F.lit(fill)))
     return panel
+
+
+def weekly_kpis(transactions: DataFrame) -> DataFrame:
+    """One row per week for the dashboard overview.
+
+    Sales and baskets include all lines (what the retailer took); units and the promotion share use
+    merchandise lines only. Promotion share is only defined where promotion status is recorded
+    (causal stores, weeks 9-101) and is left null elsewhere rather than 0.
+    """
+    merch = ~F.col("is_non_merchandise")
+    observed = merch & F.coalesce(F.col("promo_observed"), F.lit(False))
+    promoted = observed & (
+        F.coalesce(F.col("on_display"), F.lit(False)) | F.coalesce(F.col("on_mailer"), F.lit(False))
+    )
+    out = transactions.groupBy("week_no").agg(
+        F.sum("sales_value").cast("double").alias("sales"),
+        F.sum(F.when(merch, F.col("quantity")).otherwise(F.lit(0))).alias("units"),
+        F.countDistinct("basket_id").alias("baskets"),
+        F.countDistinct("household_key").alias("active_households"),
+        F.sum(-F.col("retail_disc")).cast("double").alias("loyalty_discount"),
+        F.sum(F.when(promoted, F.col("sales_value")).otherwise(F.lit(0)))
+        .cast("double")
+        .alias("_promo_sales"),
+        F.sum(F.when(observed, F.col("sales_value"))).cast("double").alias("_observed_sales"),
+    )
+    return (
+        out.withColumn("sales_per_household", F.col("sales") / F.col("active_households"))
+        .withColumn("avg_basket_spend", F.col("sales") / F.col("baskets"))
+        .withColumn(
+            "promo_share_of_sales", F.try_divide(F.col("_promo_sales"), F.col("_observed_sales"))
+        )
+        .withColumn("ramp_up", F.col("week_no") <= RAMP_UP_LAST_WEEK)
+        .withColumnRenamed("_promo_sales", "promo_sales")
+        .withColumnRenamed("_observed_sales", "promo_observed_sales")
+        .orderBy("week_no")
+    )
 
 
 def dq_summary(dq_log: DataFrame) -> DataFrame:

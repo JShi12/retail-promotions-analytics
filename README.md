@@ -1,55 +1,95 @@
 # Retail promotions analytics on Databricks
 
-Promotion effectiveness, customer segmentation and coupon-response targeting for a grocery
-retailer, built as a Databricks medallion pipeline (Delta + Unity Catalog) in PySpark on
-dunnhumby's *The Complete Journey* (2,500 households, ~2 years, 2.6M transaction lines).
+Which promotions lift sales, which customers respond to price and coupons, and who should receive the
+next coupon campaign: an end-to-end analysis for a grocery retailer's pricing and promotions team,
+built on Databricks (PySpark, Delta Lake, Unity Catalog) with dunnhumby's *The Complete Journey*
+(2,500 households, two years, 2.6M purchase lines).
 
-> Status: Phases 0–4 complete. The pipeline, promotion effectiveness, customer segmentation and the
-> coupon response model have run on Databricks Free Edition with no failed data-quality checks, and
-> every result matches the local run. Phase 5 (dashboard, scheduled job, report) is next.
+**Read the findings:** [REPORT.md](REPORT.md) (for a pricing and promotions manager).
 
-## Questions
+## What we found
 
-1. Which promotion levers (display, mailer, discount depth) are associated with higher unit sales, by category?
-2. Which household segments exist, and how do they differ in basket, promo sensitivity and demographics?
-3. Which households should receive a coupon campaign, and how much better is a model than a simple rule?
+- **Mailer weeks sell about 84% more units** of the featured product (+84.4%, 95% CI +75.3% to +94.1%),
+  not the five-fold lift a raw comparison suggests. Fresh meat and milk respond most (pork +745%,
+  chicken +356%); snacks, bread and frozen pizza least (+19% to +26%); beer shows no detectable lift.
+- **An in-store display goes with 2.8 to 4.6 times normal sales** in the stores that have it.
+- **Three stable customer segments** by price-and-promotion behaviour. One in five households, the
+  coupon users, redeem campaign coupons in 30.4% of campaigns against 6.3–6.4% for everyone else.
+- **A model targets coupon campaigns better than the best simple rule**: sending each campaign to the
+  top 20% of eligible households would have captured 58.5% of redemptions, against 51.4% using past
+  coupon use and 20% at random. It also beat the rule on later campaigns it was not trained on.
 
-## Plan
+Promotion results are associations, not proven causal effects, and the targeting model predicts
+redemption, not extra sales. The recommended next step is a **randomised holdout** in future
+campaigns to measure what coupons actually add (see [REPORT.md](REPORT.md)).
+
+## Dashboard
+
+A Databricks AI/BI dashboard on the gold tables, with five pages: overview, promotion levers,
+customer segments, a targeting back-test and data quality. Every chart reads a tested SQL view, so it
+shows the same numbers as the notebooks. Build guide: [docs/dashboard_guide.md](docs/dashboard_guide.md).
+
+## How it is built
+
+```
+raw CSVs ──► bronze ──► silver ──► gold ──► analysis notebooks ──► dashboard views ──► dashboard
+(volume)    as received  typed,     business   10 promotions         SQL, tested
+                         checked,   tables     20 segments
+                         flagged               30 coupon targeting
+                └──────────── data-quality log and checks (ops) ────────────┘
+```
+
+| Stage | What it does |
+|---|---|
+| Data pipeline (notebooks `00`–`04`) | Medallion layers in Delta tables on Unity Catalog. Problem rows are **flagged, not deleted**; every changed, flagged or dropped row is logged with its reason, and error-level checks stop a run. Column dictionary and data findings: [data/README.md](data/README.md). |
+| Promotion effectiveness (`10`) | Fixed-effects Poisson regression of weekly product units on mailer and display exposure, by category, with timing checks and seven sensitivity variants (pyfixest). |
+| Customer segments (`20`) | Spark MLlib k-means on behaviour measured against category × store benchmarks; number of segments chosen by bootstrap stability and a shuffled-data baseline. |
+| Coupon targeting (`30`) | Logistic regression and gradient-boosted trees (scikit-learn) with nested, household-grouped cross-validation, judged within each campaign against a simple rule, plus a time-forward test. |
+| Dashboard (`40`) | SQL views in a `dashboard` schema; the dashboard itself is built from the guide. |
+| Orchestration | A scheduled Databricks job runs everything in order ([jobs/retail_pipeline.yml](jobs/retail_pipeline.yml), [setup](docs/job_setup.md)). |
+| Quality | Logic lives in `src/` and is unit-tested with pytest on local Spark; GitHub Actions runs lint and tests on every push. |
+
+**Tools:** PySpark 4.2, Delta Lake, Unity Catalog, Databricks Free Edition (serverless), Spark MLlib
+(clustering), scikit-learn (small-data models), pyfixest (fixed-effects regression), pytest, GitHub
+Actions, `uv`, Python 3.12 (matching Databricks serverless environment version 6).
+
+**Why both Spark and scikit-learn:** Spark handles the 36.8M-row promotion table and the pipeline;
+the coupon model trains on 7,208 household-campaign rows, where single-machine scikit-learn is the
+right tool (Spark MLlib's boosted trees ran for over an hour on serverless for the same work).
+
+## Project status
 
 | Phase | Deliverable | Status |
 |---|---|---|
-| 0 | Setup, data download and inspection, column dictionary ([data/README.md](data/README.md)) | done |
-| 1 | Medallion pipeline: bronze → silver (typed, deduplicated, flag-don't-drop, `dq_log`) → gold; DQ checks; pytest; CI | done: run on Databricks; no failed checks |
-| 2 | Promotion effectiveness: fixed-effects Poisson models of weekly units on mailer and display, by category, with sensitivity and timing checks ([plan](docs/phase2_plan.md)) | done: run on Databricks; every estimate matches the local run |
-| 3 | Segmentation: Spark MLlib k-means on price-and-promotion behaviour (category- and store-adjusted), k by bootstrap stability and a shuffled baseline ([plan](docs/phase3_plan.md)) | done: run on Databricks; results match the local run exactly |
-| 4 | Coupon campaign response: scikit-learn logistic regression (L1) and gradient-boosted trees with nested household-grouped CV, judged within campaign against a coupon-share rule; time-forward check and targeting curve ([plan](docs/phase4_plan.md)) | done: run on Databricks; results match the local run exactly |
-| 5 | Dashboard on gold tables, scheduled Databricks job, commercial README, REPORT.md | planned |
+| 0 | Data download, inspection and column dictionary | done |
+| 1 | Medallion pipeline with data-quality logging, tests, CI ([plan](docs/phase1_plan.md)) | done, run on Databricks |
+| 2 | Promotion effectiveness ([plan](docs/phase2_plan.md)) | done, run on Databricks |
+| 3 | Customer segmentation ([plan](docs/phase3_plan.md)) | done, run on Databricks |
+| 4 | Coupon campaign response model ([plan](docs/phase4_plan.md)) | done, run on Databricks |
+| 5 | Dashboard, scheduled job, README and report ([plan](docs/phase5_plan.md)) | views, job definition and report built; dashboard and job run pending |
 | Stretch | Re-run on dunnhumby "Let's Get Sort-of-Real" (~300M rows) for scale | optional |
 
-## Stack
-
-PySpark 4.2 / Delta Lake on Databricks Free Edition (serverless), Unity Catalog, MLlib (clustering),
-scikit-learn (small-data models), pyfixest (fixed-effects regression), pytest,
-GitHub Actions. Local development with `uv` and Python 3.12, matching Databricks serverless
-environment version 6.
+Every Databricks result so far matches the local run of the same code exactly.
 
 ## Repo layout
 
 ```
-src/retail_promo/   PySpark transforms (bronze/silver/gold, dq, features), unit-tested
-notebooks/          Thin Databricks notebooks that call src/ (via a Databricks Git folder)
-tests/              pytest on local Spark with synthetic data
-data/README.md      Column dictionary and data findings (raw data is gitignored)
-docs/               Phase plans (docs/phase1_plan.md … docs/phase4_plan.md)
-reports/figures/    Saved figures (aggregates only)
+src/retail_promo/   pipeline (bronze/silver/gold, data-quality rules and checks), analysis and dashboard SQL
+notebooks/          thin Databricks notebooks that call src/ (run from a Databricks Git folder)
+tests/              pytest on local Spark with synthetic data (never real rows)
+jobs/               Databricks job definition
+docs/               phase plans, dashboard and job guides
+data/README.md      column dictionary and data findings (raw data is gitignored)
+reports/figures/    figures (aggregates only)
+REPORT.md           findings for a pricing and promotions manager
 ```
 
-Notebook numbering: `00`–`04` are the pipeline and run in order (setup, bronze, silver, gold,
-data-quality report). Analysis notebooks are numbered in tens by phase: `10` promotion
-effectiveness (Phase 2), `20` customer segments (Phase 3), `30` for Phase 4. Each reads only the
-gold tables, and the gaps leave room for follow-ups (e.g. `11_...`) without renumbering.
+Notebook numbering: `00`–`04` are the pipeline and run in order; analysis notebooks are numbered in
+tens by phase (`10`, `20`, `30`, `40`), leaving room for follow-ups (e.g. `11_...`) without renumbering.
 
-## Local setup
+## Running it
+
+### Locally
 
 ```bash
 brew install openjdk@17            # local Spark needs a JDK
@@ -57,62 +97,42 @@ uv sync
 JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run pytest
 ```
 
-Raw data: download `dunnhumby_The-Complete-Journey.zip` from
-<https://www.dunnhumby.com/source-files/> and unzip into `data/raw/complete_journey/`.
-Do not commit or redistribute it; see the terms note in [data/README.md](data/README.md).
-
-Local dry run of the whole pipeline (Parquet instead of Delta, same code as Databricks):
+Download `dunnhumby_The-Complete-Journey.zip` from <https://www.dunnhumby.com/source-files/> and unzip
+into `data/raw/complete_journey/`. The data is about 850 MB of CSV, small enough for local Spark, so
+every phase also runs locally with the same `src/` code, writing Parquet instead of Delta. These runs
+are the development loop and the source of the figures in `reports/figures/`.
 
 ```bash
-JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.run_local \
+export JAVA_HOME=/opt/homebrew/opt/openjdk@17
+uv run python -m retail_promo.run_local \
   --raw-dir "data/raw/complete_journey/dunnhumby_The-Complete-Journey/dunnhumby_The-Complete-Journey CSV" \
-  --out-dir data/processed
+  --out-dir data/processed                                  # pipeline, ~3 min
+uv run python -m retail_promo.analysis.run_phase2_local     # promotions, ~30 s
+uv run python -m retail_promo.analysis.run_phase3_local     # segments, ~10 min
+uv run python -m retail_promo.analysis.run_phase4_local     # coupon targeting, ~1 min
 ```
 
-The data (about 850 MB of CSV) is small enough for local Spark, so every phase also runs on a
-laptop with the same `src/` code, writing Parquet instead of Delta. These local runs are the
-development loop and **the source of the figures committed in `reports/figures/`**; the Databricks
-runs reproduce their numbers exactly and save their own figures to the Unity Catalog volume
-`ops/figures`, so they never write into the Git folder.
+### On Databricks (Free Edition)
 
-Phase 2 and 3 locally (need the local pipeline run above; write figures to `reports/figures/`):
+1. Add this repo as a **Git folder** (*Workspace → Create → Git folder*).
+2. Run `notebooks/00_setup` once: it creates the `retail` catalog, the `raw`, `bronze`, `silver`,
+   `gold` and `ops` (operations: logs and run records) schemas and the `raw.landing` volume.
+3. Upload the 8 CSVs (about 848 MB) to *Catalog → raw → landing*.
+4. Create the job from [docs/job_setup.md](docs/job_setup.md) and run it once, or run the notebooks
+   in order: `01`–`04`, then `10`, `20`, `30`, then `40`.
+5. Build the dashboard from [docs/dashboard_guide.md](docs/dashboard_guide.md).
 
-```bash
-JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase2_local
-JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase3_local   # Phase 3, ~10 min
-JAVA_HOME=/opt/homebrew/opt/openjdk@17 uv run python -m retail_promo.analysis.run_phase4_local   # Phase 4, ~1 min
-```
+Things that matter on Free Edition:
 
-## Running on Databricks (Free Edition)
+- Attach notebooks to plain **Serverless**, not **Git Folder Serverless**: the latter installs this
+  repo's `pyproject.toml`, whose open-source `pyspark` replaces Databricks' own and stops the kernel.
+- After pulling new commits, **detach and reattach** a notebook before running: a live session keeps
+  the code it first imported. Notebooks print a `code fingerprint` and stop if the session is stale
+  (compare with `uv run python -c "import retail_promo; print(retail_promo.CODE_FINGERPRINT)"`).
+- Notebooks save figures to the Unity Catalog volume `ops/figures`, never into the Git folder.
 
-Attach every notebook to plain **Serverless** compute, not **Git Folder Serverless**. Git Folder
-Serverless builds its environment from this repo's `pyproject.toml`, which pins open-source `pyspark`
-for local development; installing it replaces Databricks' own PySpark and the notebook kernel fails
-to start.
+## Data terms
 
-1. Push this repo to GitHub, then in Databricks: *Workspace → Create → Git folder* with the repo URL.
-2. Run `notebooks/00_setup` once. It creates the catalog (`retail`, or set the widget to `workspace`),
-   the `raw/bronze/silver/gold` schemas plus `ops` (operations: logs and run records) and the `raw.landing` volume.
-3. Upload the 8 CSVs to the volume (*Catalog → raw → landing → Upload to this volume*), about 848 MB.
-4. Re-run the last cell of `00_setup` to confirm all files are present, then run `01_bronze`,
-   `02_silver`, `03_gold` and `04_dq_report` in order. `01_bronze` starts a run; the next two pick
-   up its `run_id` automatically (or pass one in the `run_id` widget, as a job does).
-After pulling new commits into the Git folder, detach and reattach the notebook before running:
-a live Python session keeps the code it first imported. Notebooks print a `code fingerprint` and
-stop if the session is stale; compare it with `uv run python -c "import retail_promo; print(retail_promo.CODE_FINGERPRINT)"` locally.
-
-5. Phase 2: run `10_promo_effectiveness`. Its first cell installs `pyfixest` from PyPI.
-6. Phase 3: run `20_customer_segments` (several minutes: k selection refits k-means many times).
-7. Phase 4: run `30_coupon_response` (models are scikit-learn on the driver, so it takes minutes, not hours).
-
-## Pipeline (Phase 1)
-
-| Layer | What it holds | Key rules |
-|---|---|---|
-| bronze | 8 raw tables, all strings, `_source_file` / `_ingested_at` / `_run_id` | row counts must equal raw file lines |
-| silver | typed tables with a `dq_flags` array per row | `try_cast` (bad values flagged), exact duplicates dropped, everything else flagged; `causal_data` conflicts collapsed by OR rule |
-| gold | `household_features`, `product_week_panel`, `campaign_household`, `dq_summary` | campaign features use only data before each campaign start |
-| ops | `dq_log` (one row per flagged / modified / dropped record), `dq_check_results`, `pipeline_runs` | appended per `run_id` |
-
-Rules and checks are listed in [`src/retail_promo/dq.py`](src/retail_promo/dq.py) and
-[`src/retail_promo/pipeline.py`](src/retail_promo/pipeline.py).
+dunnhumby's site terms allow research, personal and non-commercial use and prohibit redistributing the
+data without permission, so this repo contains no raw or row-level data: tests use synthetic rows and
+published outputs are aggregates. Details in [data/README.md](data/README.md).

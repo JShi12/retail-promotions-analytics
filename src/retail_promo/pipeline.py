@@ -210,12 +210,24 @@ def run_gold(
         "campaign_household",
     )
     io.write(gold.dq_summary(io.read("ops", "dq_log")), "gold", "dq_summary")
+    io.write(gold.weekly_kpis(s["transactions"]), "gold", "weekly_kpis")
 
     hf = io.read("gold", "household_features")
     panel = io.read("gold", "product_week_panel")
     ch = io.read("gold", "campaign_household")
+    wk = io.read("gold", "weekly_kpis")
     L = "gold"
+    total_sales = s["transactions"].agg(F.sum("sales_value").cast("double")).first()[0]
+    weekly_sales = wk.agg(F.sum("sales")).first()[0]
     results = [
+        dq.check_unique(wk, ["week_no"], L, "weekly_kpis"),
+        dq.check_equal(
+            L,
+            "weekly_kpis",
+            "weekly_sales_sum_to_total_cents",
+            round(weekly_sales * 100),
+            round(total_sales * 100),
+        ),
         dq.check_unique(hf, ["household_key"], L, "household_features"),
         dq.check_equal(
             L,
