@@ -37,10 +37,10 @@ Two to three pages for a **pricing and promotions manager**: context, data and i
 
 ## Done when
 
-- [ ] `gold.weekly_kpis` and the dashboard views pass their tests locally; the views reproduce the notebook tables (lifts, segment profiles, capture curve)
+- [x] `gold.weekly_kpis` and the dashboard views pass their tests locally; the views reproduce the notebook tables (lifts, segment profiles, capture curve)
 - [x] Job created and one full run succeeds on Databricks (46 min 10 s, 2026-10-13); schedule to be paused
-- [ ] Dashboard built, saved in the Git folder and committed
-- [ ] README and REPORT.md written; every REPORT number traced to a notebook
+- [x] Dashboard built and published; screenshots in `reports/figures/` (the `.lvdash.json` file still to be committed from Databricks)
+- [x] README and REPORT.md written; every REPORT number traced to a notebook
 
 ## Review changes and future work
 

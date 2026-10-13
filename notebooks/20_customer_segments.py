@@ -145,7 +145,7 @@ show(plots.actual_vs_expected(res.profiles), "phase3_actual_vs_expected")
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC - Segment 1 puts 26.7% of spend on promotion against 22.8% expected (+3.9 points) and takes 18.8% off the shelf price against 16.2% expected.
+# MAGIC - Segment 1 puts 26.8% of spend on promotion against 22.8% expected (+4.0 points) and takes 18.8% off the shelf price against 16.2% expected.
 # MAGIC - Segment 2 is the own-label buyer: 29.9% of spend against 22.4% expected (+7.5 points), plus promotion 26.3% vs 23.1% (+3.2 points).
 # MAGIC - Segment 3 buys less on promotion than its categories and stores predict: 17.8% vs 21.8% (−4.0 points), 13.2% vs 15.5% off shelf price, and own label 17.4% vs 21.5% (−4.1 points).
 # MAGIC - The expected values are close across segments (21.8%–23.1% for promotion), so the differences come from behaviour, not from where or what the segments buy.

@@ -29,6 +29,21 @@ A Databricks AI/BI dashboard on the gold tables, with five pages: overview, prom
 customer segments, a targeting back-test and data quality. Every chart reads a tested SQL view, so it
 shows the same numbers as the notebooks. Build guide: [docs/dashboard_guide.md](docs/dashboard_guide.md).
 
+**Overview:** headline totals and weekly trends (partial and ramp-up weeks flagged).
+![Dashboard overview](reports/figures/dashboard_overview.png)
+
+**Promotion levers:** mailer-week and in-store display lift by category, timing around a mailer, sensitivity.
+![Dashboard promotion levers](reports/figures/dashboard_promotions.png)
+
+**Customer segments:** size, share of spend, actual vs expected behaviour, coupon redemption.
+![Dashboard customer segments](reports/figures/dashboard_segments.png)
+
+**Targeting back-test:** share of redemptions captured by model score vs past coupon use vs random.
+![Dashboard targeting](reports/figures/dashboard_targeting.png)
+
+**Data quality:** checks for the latest run, rows flagged / modified / dropped, run history.
+![Dashboard data quality](reports/figures/dashboard_data_quality.png)
+
 ## How it is built
 
 ```
@@ -66,7 +81,7 @@ right tool (Spark MLlib's boosted trees ran for over an hour on serverless for t
 | 2 | Promotion effectiveness ([plan](docs/phase2_plan.md)) | done, run on Databricks |
 | 3 | Customer segmentation ([plan](docs/phase3_plan.md)) | done, run on Databricks |
 | 4 | Coupon campaign response model ([plan](docs/phase4_plan.md)) | done, run on Databricks |
-| 5 | Dashboard, scheduled job, README and report ([plan](docs/phase5_plan.md)) | job run on Databricks (46 min); dashboard pending |
+| 5 | Dashboard, scheduled job, README and report ([plan](docs/phase5_plan.md)) | done: job run on Databricks (46 min), dashboard published |
 | Stretch | Re-run on dunnhumby "Let's Get Sort-of-Real" (~300M rows) for scale | optional |
 
 Every Databricks result so far matches the local run of the same code exactly.
