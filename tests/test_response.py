@@ -67,13 +67,14 @@ def test_permutation_stays_within_campaign():
     assert (out["c"] == df["c"]).all()  # campaign-level values unchanged
 
 
-def test_logistic_pipeline_learns_a_simple_signal(spark):
+def test_logistic_pipeline_learns_a_simple_signal():
     rng = np.random.default_rng(5)
     n = 400
     d = pd.DataFrame({f: rng.normal(size=n) for f in rs.FEATURES})
     d["household_key"] = np.arange(n)
     d["campaign"] = rng.integers(1, 4, n)
     d["redeemed"] = (d["coupon_line_share"] + rng.normal(0, 0.5, n) > 0.8).astype(int)
-    model = rs._pipeline("logistic_l1", {"regParam": 0.01}).fit(rs._spark(spark, d))
-    d["score"] = rs.predict(model, spark, d)
-    assert rs.within_campaign_auc(d, "score") > 0.9
+    d.loc[::7, "promo_spend_share"] = np.nan  # missing values are imputed inside the pipeline
+    for kind, params in [("logistic_l1", {"C": 0.1}), ("gbt", {"max_depth": 1, "max_iter": 50})]:
+        model = rs.fit(kind, params, d)
+        assert rs.within_campaign_auc(d.assign(score=rs.predict(model, d)), "score") > 0.9

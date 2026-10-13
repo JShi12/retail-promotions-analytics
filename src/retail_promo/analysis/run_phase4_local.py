@@ -25,7 +25,7 @@ def main() -> None:
     spark = local_spark()
     spark.sparkContext.setLogLevel("ERROR")
     io = LocalParquetIO(spark, args.data_dir, "unused")
-    res = response.run(spark, io.read("gold", "campaign_household").toPandas())
+    res = response.run(io.read("gold", "campaign_household").toPandas())
     response.write_gold(spark, io, res, run_id="local")
     if args.pickle:
         with open(args.pickle, "wb") as fh:
@@ -51,7 +51,7 @@ def main() -> None:
     )
     imp = res.importance.groupby(["model", "group"])["auc_drop"].agg(["mean", "std"]).round(4)
     print("\nimportance\n", imp.to_string())
-    path = res.path.pivot(index="feature", columns="reg_param", values="coef").round(3)
+    path = res.path.pivot(index="feature", columns="C", values="coef").round(3)
     print("\nL1 path (nonzero at any penalty)\n", path[(path != 0).any(axis=1)].to_string())
 
 

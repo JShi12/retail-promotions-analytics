@@ -3,8 +3,12 @@
 Predicts whether a household redeems at least one coupon from a campaign it receives, from
 pre-campaign information only. Primary metric: ROC AUC within each campaign (the targeting
 decision is who receives a given campaign), averaged with weights equal to the campaign's
-redemptions. Models are Spark MLlib pipelines; tuning is a nested, household-grouped loop that
-optimises the same within-campaign AUC.
+redemptions. Tuning is a nested, household-grouped loop that optimises the same within-campaign
+AUC.
+
+The models are scikit-learn, fitted on the driver: the table has 7,208 rows, and Spark MLlib's
+gradient-boosted trees run one Spark job per tree, which on serverless compute turned a
+15-minute local run into hours. Spark still reads and prepares the data.
 """
 
 from __future__ import annotations
@@ -14,11 +18,12 @@ from dataclasses import dataclass, field
 
 import numpy as np
 import pandas as pd
-from pyspark.ml import Pipeline, PipelineModel
-from pyspark.ml.classification import GBTClassifier, LogisticRegression
-from pyspark.ml.feature import Imputer, StandardScaler, VectorAssembler
-from pyspark.ml.functions import vector_to_array
-from pyspark.sql import DataFrame, SparkSession
+from pyspark.sql import SparkSession
+from sklearn.ensemble import HistGradientBoostingClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
 
 KEY = ["household_key", "campaign"]
 LABEL = "redeemed"
@@ -55,11 +60,11 @@ EXCLUDED = [
 ]
 
 GRIDS = {
-    "logistic_l1": [{"regParam": r} for r in (0.001, 0.005, 0.02, 0.05)],
-    # Grid history: depth (2, 4) x trees (50, 100) chose the lower corner in every fold; depth
-    # (1, 2, 3) x trees (20, 50, 100) then chose depth 1 with 100 trees, the top of the tree range.
-    # Depth 1 is a floor; the tree count is extended to 200. All inner scores are kept (grid table).
-    "gbt": [{"maxDepth": d, "maxIter": n} for d in (1, 2, 3) for n in (50, 100, 200)],
+    # C is the inverse L1 penalty strength (smaller C = more features shrunk to zero).
+    "logistic_l1": [{"C": c} for c in (0.003, 0.01, 0.03, 0.1, 0.3, 1.0)],
+    # Depth 1-3 and 50-400 trees at learning rate 0.1. The earlier Spark MLlib version kept choosing
+    # the edge of a smaller grid (finally depth 1, 200 trees), so this grid spans past it.
+    "gbt": [{"max_depth": d, "max_iter": n} for d in (1, 2, 3) for n in (50, 100, 200, 400)],
 }
 
 
@@ -158,41 +163,37 @@ def metrics(df: pd.DataFrame, score: str) -> dict[str, float]:
     }
 
 
-# ---------------------------------------------------------------- models (MLlib)
+# ---------------------------------------------------------------- models (scikit-learn)
 
 
 def _pipeline(kind: str, params: dict, seed: int = 7) -> Pipeline:
-    imputed = [f"{c}_imp" for c in FEATURES]
-    stages = [
-        Imputer(inputCols=FEATURES, outputCols=imputed, strategy="median"),
-        VectorAssembler(inputCols=imputed, outputCol="raw"),
-        StandardScaler(inputCol="raw", outputCol="features", withMean=True, withStd=True),
-    ]
+    """Imputation and scaling are steps of the pipeline, so they are fitted on training folds only."""
     if kind == "logistic_l1":
         clf = LogisticRegression(
-            labelCol=LABEL, elasticNetParam=1.0, standardization=False, maxIter=200, **params
+            penalty="l1", solver="liblinear", max_iter=1000, random_state=seed, **params
         )
+        steps = [
+            ("impute", SimpleImputer(strategy="median")),
+            ("scale", StandardScaler()),
+            ("model", clf),
+        ]
     else:
-        clf = GBTClassifier(labelCol=LABEL, stepSize=0.1, seed=seed, **params)
-    return Pipeline(stages=[*stages, clf])
+        clf = HistGradientBoostingClassifier(
+            learning_rate=0.1, early_stopping=False, random_state=seed, **params
+        )
+        steps = [("impute", SimpleImputer(strategy="median")), ("model", clf)]
+    return Pipeline(steps)
 
 
-def _spark(spark: SparkSession, pdf: pd.DataFrame) -> DataFrame:
-    # One sorted partition: MLlib's random choices depend on partitioning (see Phase 3).
-    return spark.createDataFrame(pdf.sort_values(KEY)).coalesce(1)
+def fit(kind: str, params: dict, data: pd.DataFrame) -> Pipeline:
+    return _pipeline(kind, params).fit(data[FEATURES], data[LABEL])
 
 
-def predict(model: PipelineModel, spark: SparkSession, pdf: pd.DataFrame) -> np.ndarray:
-    out = model.transform(_spark(spark, pdf)).select(
-        *KEY, vector_to_array("probability")[1].alias("p")
-    )
-    scored = out.toPandas()
-    return pdf[KEY].merge(scored, on=KEY, how="left")["p"].to_numpy()
+def predict(model: Pipeline, data: pd.DataFrame) -> np.ndarray:
+    return model.predict_proba(data[FEATURES])[:, 1]
 
 
-def tune_and_fit(
-    spark: SparkSession, train: pd.DataFrame, kind: str, inner_folds: int = 3, seed: int = 11
-):
+def tune_and_fit(train: pd.DataFrame, kind: str, inner_folds: int = 3, seed: int = 11):
     """Choose parameters by inner household-grouped CV on within-campaign AUC, then refit on all of train."""
     inner = grouped_folds(train, inner_folds, seed, col="inner")
     scores = []
@@ -200,13 +201,14 @@ def tune_and_fit(
         fold_auc = []
         for f in range(inner_folds):
             fit_part, val_part = train[inner != f], train[inner == f]
-            model = _pipeline(kind, params).fit(_spark(spark, fit_part))
-            val = val_part.assign(score=predict(model, spark, val_part))
-            fold_auc.append(within_campaign_auc(val, "score"))
+            model = fit(kind, params, fit_part)
+            fold_auc.append(
+                within_campaign_auc(val_part.assign(score=predict(model, val_part)), "score")
+            )
         scores.append((float(np.mean(fold_auc)), params))
     best_auc, best = max(scores, key=lambda s: s[0])
     grid = pd.DataFrame([{**p, "inner_auc_within": a} for a, p in scores])
-    return _pipeline(kind, best).fit(_spark(spark, train)), best, best_auc, grid
+    return fit(kind, best, train), best, best_auc, grid
 
 
 # ---------------------------------------------------------------- importance
@@ -223,31 +225,25 @@ def permuted_within_campaign(df: pd.DataFrame, cols: list[str], seed: int) -> pd
     return out
 
 
-def group_importance(spark, model, test: pd.DataFrame, repeats: int, seed: int) -> dict[str, float]:
-    base = within_campaign_auc(test.assign(score=predict(model, spark, test)), "score")
+def group_importance(model, test: pd.DataFrame, repeats: int, seed: int) -> dict[str, float]:
+    base = within_campaign_auc(test.assign(score=predict(model, test)), "score")
     drops = {}
     for name, cols in FEATURE_GROUPS.items():
         d = []
         for r in range(repeats):
             perm = permuted_within_campaign(test, cols, seed + r)
-            d.append(
-                base - within_campaign_auc(perm.assign(score=predict(model, spark, perm)), "score")
-            )
+            d.append(base - within_campaign_auc(perm.assign(score=predict(model, perm)), "score"))
         drops[name] = float(np.mean(d))
     return drops
 
 
-def l1_path(
-    spark: SparkSession, data: pd.DataFrame, reg_params=(0.2, 0.1, 0.05, 0.02, 0.01, 0.005)
-) -> pd.DataFrame:
-    """Standardised logistic coefficients as the L1 penalty loosens: which features enter first."""
+def l1_path(data: pd.DataFrame, cs=(0.001, 0.003, 0.01, 0.03, 0.1, 0.3)) -> pd.DataFrame:
+    """Standardised logistic coefficients as the L1 penalty loosens (C grows): which features enter first."""
     rows = []
-    for r in reg_params:
-        model = _pipeline("logistic_l1", {"regParam": r}).fit(_spark(spark, data))
-        coefs = model.stages[-1].coefficients.toArray()
+    for c in cs:
+        coefs = fit("logistic_l1", {"C": c}, data).named_steps["model"].coef_[0]
         rows += [
-            {"reg_param": r, "feature": f, "coef": float(c)}
-            for f, c in zip(FEATURES, coefs, strict=True)
+            {"C": c, "feature": f, "coef": float(v)} for f, v in zip(FEATURES, coefs, strict=True)
         ]
     return pd.DataFrame(rows)
 
@@ -278,9 +274,7 @@ def _scorers(models: list[str]) -> dict[str, str]:
     return {**RULES, **{m: f"score_{m}" for m in models}}
 
 
-def run(
-    spark: SparkSession, campaign_household: pd.DataFrame, n_folds: int = 5, repeats: int = 2
-) -> Phase4Results:
+def run(campaign_household: pd.DataFrame, n_folds: int = 5, repeats: int = 2) -> Phase4Results:
     data = model_table(campaign_household)
     data["fold"] = grouped_folds(data, n_folds, seed=2026)
     models = list(GRIDS)
@@ -290,11 +284,11 @@ def run(
     for f in range(n_folds):
         train, test = data[data["fold"] != f], data[data["fold"] == f]
         for m in models:
-            model, params, inner_auc, grid = tune_and_fit(spark, train, m)
+            model, params, inner_auc, grid = tune_and_fit(train, m)
             chosen[m].append({"fold": f, **params, "inner_auc_within": inner_auc})
             grids.append(grid.assign(model=m, fold=f))
-            data.loc[test.index, f"score_{m}"] = predict(model, spark, test)
-            for g, drop in group_importance(spark, model, test, repeats, seed=100 * f).items():
+            data.loc[test.index, f"score_{m}"] = predict(model, test)
+            for g, drop in group_importance(model, test, repeats, seed=100 * f).items():
                 imp_rows.append({"model": m, "fold": f, "group": g, "auc_drop": drop})
 
     scorers = _scorers(models)
@@ -330,18 +324,18 @@ def run(
     return Phase4Results(
         data=data, fold_metrics=fold_metrics, summary=summary, paired=paired,
         chosen={m: pd.DataFrame(v) for m, v in chosen.items()},
-        importance=pd.DataFrame(imp_rows), path=l1_path(spark, data), capture_curve=curve,
-        time_forward=time_forward(spark, data, best), drift=drift_table(data), best_model=best,
+        importance=pd.DataFrame(imp_rows), path=l1_path(data), capture_curve=curve,
+        time_forward=time_forward(data, best), drift=drift_table(data), best_model=best,
         grid=pd.concat(grids, ignore_index=True),
     )  # fmt: skip
 
 
-def time_forward(spark: SparkSession, data: pd.DataFrame, kind: str) -> pd.DataFrame:
+def time_forward(data: pd.DataFrame, kind: str) -> pd.DataFrame:
     """Train on campaigns ended before TIME_CUTOFF, test on campaigns starting on/after it."""
     train = data[data["end_day"] < TIME_CUTOFF]
     test = data[data["start_day"] >= TIME_CUTOFF].copy()
-    model, *_ = tune_and_fit(spark, train, kind)
-    test["score"] = predict(model, spark, test)
+    model, *_ = tune_and_fit(train, kind)
+    test["score"] = predict(model, test)
     rows = [{"campaign": "ALL", "pairs": len(test), "redeemed": int(test[LABEL].sum()),
              "model_auc": within_campaign_auc(test, "score"),
              "rule_auc": within_campaign_auc(test, "coupon_line_share")}]  # fmt: skip

@@ -36,11 +36,13 @@ Correction: the review first reported 16.4% / 9.3% / 44% for the drift row, from
 3. **Time-forward check**: train on campaigns that **ended before day 587**, test on campaigns starting on or after day 587 (campaigns 18–25: 2,318 pairs, 324 redeemed). Campaigns still running on day 587 (14–17) are left out of training because their outcomes were not yet known. Campaign 18 holds 66% of the test redemptions, so results are also shown per campaign. 92% of test households also appear in training, as they would in practice.
 4. **Reproducibility**: the data is held in one sorted partition (Spark's random starts and sampling depend on partitioning).
 
-## Models (Spark MLlib)
+## Models (scikit-learn; changed from Spark MLlib during the build)
+
+The plan first chose Spark MLlib. On Databricks serverless the nested cross-validation ran for over an hour without finishing: MLlib's boosted trees are built one tree at a time with several Spark jobs per tree, and every job pays a fixed scheduling cost, while the table has only 7,208 rows (the same run took about 15 minutes locally). The models now use scikit-learn 1.7.2 (preinstalled in serverless environment 6) on the driver, with Spark reading and preparing the data; the full analysis runs in under a minute locally. Validation, metrics and importance are unchanged. Spark MLlib remains in use where it fits, for the Phase 3 clustering.
 
 - Baselines: always "no" (the noise floor); the past-coupon-user rule (has prior redemption); the best single-feature rule (pre-campaign coupon share).
-- Logistic regression with an L1 penalty (penalty strength tuned).
-- Gradient-boosted trees (depth, number of trees and learning rate tuned on a small grid).
+- Logistic regression with an L1 penalty (penalty strength C tuned).
+- Gradient-boosted trees (scikit-learn's histogram gradient boosting; depth 1–3 and 50–400 trees tuned, learning rate 0.1).
 - Feature importance: the L1 path, and permutation importance on held-out folds with **correlated features permuted as a group**; within a correlated group, which feature the L1 penalty keeps is treated as arbitrary.
 
 ## Metrics
